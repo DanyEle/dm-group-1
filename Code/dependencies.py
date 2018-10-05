@@ -49,31 +49,52 @@ def main():
     #average age of female: 31, average age of men: 33
     compute_average_value_given_attribute_and_columns(credit_cards, columns_pa, "education")
     
+    #now check relation between credit_default and salary
+    compute_average_value_given_attribute_and_columns(credit_cards, columns_pa, "credit_default")
+    #we can clearly see that people who had a default earn less
+    
+    
+    compute_average_value_given_attribute_and_columns(credit_cards, columns_balance, "credit_default")
+    
+    #there is no such big difference when it comes to the the balance though
+
+
     
     #now check people earning the most money based on the age. 
     compute_average_value_given_attribute_and_columns(credit_cards, columns_pa, "age")
     
-    #And check who has the most money in their bank account. Indeed, the older, the mo
+    #And check who has the most money in their bank account.
     compute_average_value_given_attribute_and_columns(credit_cards, columns_balance, "age")
     
+   # Indeed, the older, the more money they have
+
 
     #now try to make a scatter plot between the salary and the balance
-    scatter_plot_attribute_columns(columns_pa, columns_balance, data_frame)
+    scatter_plot_attribute_columns(columns_pa, columns_balance, data_frame, True)
+    
+    #we could also check the correlation between these attributes
+    
+    scatter_plot_attribute_columns(columns_pa, ["status"], data_frame, False)
+    
+    #and the correlation between these attributes too
+
 
     
 
     
     
     
-def scatter_plot_attribute_columns(columns_x, columns_y, data_frame):
+def scatter_plot_attribute_columns(columns_x, columns_y, data_frame, log_notation):
     #compute the mean value of each columns' group
-    mean_values_x = data_frame[columns_x].mean(axis=1)
-    mean_values_y = data_frame[columns_y].mean(axis=1)
     
-    #and now plot the resulting values
-    
-    plt.scatter(x = mean_values_x, y = mean_values_y)
-    
+    if(log_notation == True):
+        mean_values_x = np.log(data_frame[columns_x].mean(axis=1))
+        mean_values_y = np.log(data_frame[columns_y].mean(axis=1))
+    else:
+        mean_values_x = data_frame[columns_x].mean(axis=1))
+        mean_values_y = data_frame[columns_y]
+        
+        plt.scatter(x = mean_values_x, y = mean_values_y)
     
 
     
