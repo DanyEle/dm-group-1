@@ -1,64 +1,95 @@
+%chktex-file 44
+%chktex-file 8
+%chktex-file 13
 \documentclass[a4paper]{article}
 
-%% Language and font encodings
+%~~~~~~~~~~~~~~~~~~~~~~~~Packages~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \usepackage[english]{babel}
 \usepackage[utf8x]{inputenc}
-
 \usepackage{booktabs}
 \usepackage{tabu}
 \usepackage{cancel}
-
-
-%% Sets page size and margins
-\usepackage[a4paper,top=2cm,bottom=0.5cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
-
-%% Useful packages
 \usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{listings}
 \usepackage{subfigure}
-
 \usepackage{relsize}
-
 \usepackage{pdflscape}
 \usepackage{graphicx}
 %\usepackage{apacite}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
+%% Sets page size and margins
+\usepackage[a4paper,top=2cm,bottom=0.5cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
 
-
-\title{Data Mining Project To-Do List}
-
-
-
-\begin{document}
-\begin{landscape}
+%~~~~~~~~~~~~~~~~~~~~~~~~Commands~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \renewcommand{\abstractname}{Summary}
 
-\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Assignment 1 - Data Understanding}
-\begin{table}[]
+\begin{document}
+
+\begin{landscape}
+\begin{titlepage}
+\begin{center}
+\vspace{3cm}
+
+\huge
+
+\vspace{2cm}
+
+\includegraphics[scale=0.2]{Cherubino.jpg}
+
+\vspace{1.5cm}
+
+{\Huge \sc Data mining to-do list}
+
+\vspace{0.5cm}
+
+Maddalena Amendola
+
+\vspace{0.5cm}
+
+Daniele Gadler
+
+\vspace{0.5cm}
+
+Riccardo Manetti
+
+\vspace{0.5cm}
+
+Gemma Martini
+
+\vfill
+
+\today
+
+\end{center}
+\end{titlepage}
+
+%%%%%%%%%%%%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%%%%%%%%%%%%%
+
+\section{Assignment 1 --- Data Understanding}
+\begin{table}[h!]
 \begin{tabular}{|l|l|l|l|l|l|l|}
 \hline
-\textbf{\begin{tabular}[c]{@{}l@{}}Task \\ Index\end{tabular}} & \textbf{Task}                                                                                                                                                           & \textbf{Person} & \textbf{Output}                                                                                                                                                                                                                                                                                                    & \textbf{Remarks} & \textbf{Status} & \textbf{Deadline} \\ \hline
-1                                                              & \begin{tabular}[c]{@{}l@{}}Determine the quality of the data wrt:\\ - Syntactic Accuracy\\ - Semantic Accuracy\end{tabular}                                             & Maddalena       & \begin{tabular}[c]{@{}l@{}}- Analysis of the syntactic accuracy of all attributes in the data \\ with plots and a textual explanation of the most interesting results\\ \\ - Analysis of the semantic accuracy of all attributes in the data\\ with plots and a textual explanation of the results\end{tabular}    & \textbf{}        & To-Do           & 8/10/2018         \\ \hline
-2                                                              & Find outliers via boxplots                                                                                                                                              & Gemma           & \begin{tabular}[c]{@{}l@{}}- Boxplot of the attributes in the dataset to identify outliers\\ Textual explanation of the results obtained via the boxplots\end{tabular}                                                                                                                                             & \textbf{}        & To-Do           & 8/10/2018         \\ \hline
-3                                                              & \begin{tabular}[c]{@{}l@{}}Discover new or confirm expected dependencies \\ or correlations between attributes.\end{tabular}                                            & Daniele         & \begin{tabular}[c]{@{}l@{}}- Scatter matrix and scatter plot of the attributes in the dataset and\\ textual explanation of the results obtained via the scatter plots\end{tabular}                                                                                                                                 & \textbf{}        & To-Do           & 8/10/2018         \\ \hline
-4                                                              & \begin{tabular}[c]{@{}l@{}}- Detect and examine missing values,\\  possibly hidden by default values.\\ - Check specific application dependent assumptions\end{tabular} & Riccardo        & \begin{tabular}[c]{@{}l@{}}- Analysis to identify missing values in the dataset, with an\\ explanation of the identified missing values and eventually plots\\ thereof\\ - Plot of the distribution of attributes in the dataset\\ {[}QQPlot for identifying the normal distribution of attributes{]}\end{tabular} & \textbf{}        & To-Do           & 8/10/2018         \\ \hline
-5                                                              & \begin{tabular}[c]{@{}l@{}}BONUS: Identify possible data normalization \\ to be applied to the data\end{tabular}                                                        &                 & \begin{tabular}[c]{@{}l@{}}Data properly normalized and ready to be fed to data mining\\ algorithms\end{tabular}                                                                                                                                                                                                   &                  & To-Do           &                   \\ \hline
+  \textbf{\begin{tabular}[c]{@{}l@{}}Task \\ Index\end{tabular}} & \textbf{Task} & \textbf{Person} & \textbf{Output} & \textbf{Remarks} & \textbf{Status} & \textbf{Deadline} \\ 
+    \hline
+  1 & \begin{tabular}[c]{@{}l@{}}Determine the quality of the data wrt:\\ - Syntactic Accuracy\\ - Semantic Accuracy\end{tabular} & Maddalena & \begin{tabular}[c]{@{}l@{}}- Analysis of the syntactic accuracy of all attributes in the data \\ with plots and a textual explanation of the most interesting results\\ \\ - Analysis of the semantic accuracy of all attributes in the data\\ with plots and a textual explanation of the results\end{tabular} & \textbf{} & To-Do & 8/10/2018\\
+  \hline
+2 & Find outliers via boxplots & Gemma & \begin{tabular}[c]{@{}l@{}}- Boxplot of the attributes in the dataset to identify outliers\\ Textual explanation of the results obtained via the boxplots\end{tabular} & \textbf{} & To-Do & 8/10/2018\\
+  \hline
+3 & \begin{tabular}[c]{@{}l@{}}Discover new or confirm expected dependencies \\ or correlations between attributes.\end{tabular} & Daniele & \begin{tabular}[c]{@{}l@{}}- Scatter matrix and scatter plot of the attributes in the dataset and\\ textual explanation of the results obtained via the scatter plots\end{tabular} & \textbf{} & To-Do & 8/10/2018\\
+  \hline
+  4 & \begin{tabular}[c]{@{}l@{}}- Detect and examine missing values,\\  possibly hidden by default values.\\ - Check specific application dependent assumptions\end{tabular} & Riccardo & \begin{tabular}[c]{@{}l@{}}- Analysis to identify missing values in the dataset, with an\\ explanation of the identified missing values and eventually plots\\ thereof\\ - Plot of the distribution of attributes in the dataset\\ $[$QQPlot for identifying the normal distribution of attributes$]$\end{tabular} & \textbf{} & To-Do & 8/10/2018\\
+    \hline
+  5 & \begin{tabular}[c]{@{}l@{}}BONUS: Identify possible data normalization \\ to be applied to the data\end{tabular} & & \begin{tabular}[c]{@{}l@{}} Data properly normalized and ready to be fed to data mining\\ algorithms\end{tabular} & & To-Do &\\
+    \hline
 \end{tabular}
 \end{table}
 
-
-
-
-
 \bibliographystyle{plain}
 \bibliography{bibtex}
-
-
-
 
 \end{landscape}
 \end{document}
