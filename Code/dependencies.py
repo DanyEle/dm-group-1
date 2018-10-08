@@ -130,8 +130,8 @@ def compute_average_value_given_attribute_and_columns(data_frame, columns_df, at
     #now get the different unique types found
     unique_column_values = list(grouped_values_by_attribute.index)
     
-    for i in range(len(values_per_unique_column_entry)):
-        print("Average value of " + unique_column_values[i] + " is " + str(values_per_unique_column_entry[i]))
+   # for i in range(len(values_per_unique_column_entry)):
+    #    print("Average value of " + unique_column_values[i] + " is " + str(values_per_unique_column_entry[i]))
         
      
     plt.bar(x=unique_column_values, height=values_per_unique_column_entry)
