@@ -74,10 +74,10 @@ def highlightColumn(filePath, colName):
     return selectedCol
 
 
-"""This function creates and saves a boxplot as "boxName.png", which has howMany different plots (whose names are in the string list called colNames) from the file whose path is filePath"""
+"""This function creates and saves a boxplot as "boxName.figExtension", which has howMany different plots (whose names are in the string list called colNames) from the file whose path is filePath"""
 
 
-def printPlots(boxName, filePath, howMany, colNames):
+def printPlots(boxName, figExtension, filePath, howMany, colNames):
     if howMany == 0:
         return
     dataToPlot = []
@@ -90,7 +90,9 @@ def printPlots(boxName, filePath, howMany, colNames):
         xNames.append(i + 1)
     fig = plt.figure(1, figsize=(9, 6))
     pix = fig.add_subplot(111)
-    plt.boxplot(dataToPlot)
+    boxPlot = plt.boxplot(dataToPlot)
     plt.xticks(xNames, colNames)
-    fig.savefig(boxName + '.svg', bbox_inches='tight')
+    pix.yaxis.grid(
+        True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
+    fig.savefig(boxName + '.' + figExtension, bbox_inches='tight')
     return
