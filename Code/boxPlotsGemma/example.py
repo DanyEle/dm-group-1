@@ -17,6 +17,14 @@ limitBox = newpath + "limit"
 howManyLimit = 1
 printPlots(limitBox, figExtension, filePath, howManyLimit, limitNames)
 
+#Example of boxplot of limit values last flag activated
+limitNames = ["limit"]
+limitBox = newpath + "limitS"
+howManyLimit = 1
+printPlots(limitBox, figExtension, filePath, howManyLimit, limitNames, 1)
+#Use flag 1 at the end (default none) to obtain the limit boxplot as
+#function of the average income of Taiwan (NT$49,989, about US$1,700)
+
 #Example of boxplot of age values
 ageNames = ["age"]
 ageBox = newpath + "age"

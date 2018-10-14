@@ -77,7 +77,7 @@ def highlightColumn(filePath, colName):
 """This function creates and saves a boxplot as "boxName.figExtension", which has howMany different plots (whose names are in the string list called colNames) from the file whose path is filePath"""
 
 
-def printPlots(boxName, figExtension, filePath, howMany, colNames):
+def printPlots(boxName, figExtension, filePath, howMany, colNames, flag=None):
     if howMany == 0:
         return
     dataToPlot = []
@@ -86,7 +86,13 @@ def printPlots(boxName, figExtension, filePath, howMany, colNames):
     for i in range(0, howMany):
         colName = colNames[i]
         currCol = highlightColumn(filePath, colName)
-        dataToPlot.append(currCol)
+        if flag:
+            if colName == "limit":
+                myInt = 49989
+                newCol = [x / myInt for x in currCol]
+                dataToPlot.append(newCol)
+        else:
+            dataToPlot.append(currCol)
         xNames.append(i + 1)
     fig = plt.figure(1, figsize=(9, 6))
     pix = fig.add_subplot(111)
