@@ -1,7 +1,9 @@
 import os
 from plots import printPlots
+#Small dataset for head
+#filePath = "../../Dataset/credit_default_train_small.csv"
 
-filePath = "../../Dataset/credit_default_train_small.csv"
+filePath = "../../Dataset/credit_default_train.csv"
 newpath = "boxplots/"
 if not os.path.exists(newpath):
     os.makedirs(newpath)

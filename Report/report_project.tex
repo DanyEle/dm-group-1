@@ -88,7 +88,7 @@ This part contains a first analysis of the data contained in the credit card dat
 \subsection{BoxPlots by Gemma}
 These boxplots are created with Python and give us the chance to understand the shape of the given dataset, in order to find out possible outlayers, which may give ah hint on the many characteristics of the data.
 \subsubsection{Age}
-From this plot we can observe that
+From this plot we can observe that age has some values below $0$. We can assume that the values allowed for this field are strictly positive. We also notice that very low values (below ten years old) are pretty common and this is something that it's probably due to the high concentration of $-1$ values.
 \begin{center}
 \includegraphics[width=0.9\textwidth]{../Code/boxPlotsGemma/boxplots/age.png}
 \end{center}
