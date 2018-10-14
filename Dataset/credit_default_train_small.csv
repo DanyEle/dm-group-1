@@ -1,5 +1,5 @@
 limit,sex,education,status,age,ps-sep,ps-aug,ps-jul,ps-jun,ps-may,ps-apr,ba-sep,ba-aug,ba-jul,ba-jun,ba-may,ba-apr,pa-sep,pa-aug,pa-jul,pa-jun,pa-may,pa-apr,credit_default
-50000,male,graduate school,,25,2,0,0,0,0,0,48966,49985,50760,49535,30358,30302,2130,1905,1811,1100,1100,1200,no
+50000,male,graduate school,married,0,25,2,0,0,0,0,0,48966,49985,50760,49535,30358,30302,2130,1905,1811,1100,1100,1200,no
 200000,male,university,married,54,-1,-1,-1,-1,-1,-1,10755,9981,7843,6335,4616,7956,10120,7852,6336,4622,7956,5499,no
 30000,female,high school,married,-1,2,3,2,2,2,0,30057,29280,30206,30496,29731,29047,0,1700,1100,3,1053,1303,no
 140000,female,university,single,-1,0,0,0,0,0,0,56426,41717,42823,25224,26855,23783,2000,2000,900,2000,10000,5000,no

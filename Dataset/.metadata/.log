@@ -1,0 +1,11 @@
+!SESSION 2018-10-08 15:39:02.042 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=1.8.0_152
+java.vendor=Oracle Corporation
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en_GB
+Command-line arguments:  -os linux -ws gtk -arch x86_64
+
+!ENTRY org.eclipse.ui 2 0 2018-10-08 15:39:39.567
+!MESSAGE Warnings while parsing the key bindings from the 'org.eclipse.ui.commands' and 'org.eclipse.ui.bindings' extension point
+!SUBENTRY 1 org.eclipse.ui 2 0 2018-10-08 15:39:39.567
+!MESSAGE Cannot bind to an undefined command: plug-in='org.knime.workbench.editor', id='knime.commands.editor.gridSettings'

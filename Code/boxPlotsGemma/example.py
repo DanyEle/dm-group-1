@@ -1,0 +1,37 @@
+import os
+from plots import printPlots
+
+filePath = "../Dataset/credit_default_train_small.csv"
+newpath = "boxplots/"
+if not os.path.exists(newpath):
+    os.makedirs(newpath)
+
+#Example of boxplot of limit values
+limitNames = ["limit"]
+limitBox = newpath + "limit"
+howManyLimit = 1
+printPlots(limitBox, filePath, howManyLimit, limitNames)
+
+#Example of boxplot of age values
+ageNames = ["age"]
+ageBox = newpath + "age"
+howManyAge = 1
+printPlots(ageBox, filePath, howManyAge, ageNames)
+
+#Example of boxplot of ps values
+psNames = ["ps-sep", "ps-aug", "ps-jul", "ps-jun", "ps-may", "ps-apr"]
+psBox = newpath + "ps"
+howManyPs = 6
+printPlots(psBox, filePath, howManyPs, psNames)
+
+#Example of boxplot of ba values
+baNames = ["ba-sep", "ba-aug", "ba-jul", "ba-jun", "ba-may", "ba-apr"]
+baBox = newpath + "ba"
+howManyBa = 6
+printPlots(baBox, filePath, howManyBa, baNames)
+
+#Example of boxplot of pa values
+paNames = ["pa-sep", "pa-aug", "pa-jul", "pa-jun", "pa-may", "pa-apr"]
+paBox = newpath + "pa"
+howManyPa = 6
+printPlots(paBox, filePath, howManyPa, paNames)
