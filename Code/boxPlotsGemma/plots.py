@@ -92,5 +92,5 @@ def printPlots(boxName, filePath, howMany, colNames):
     pix = fig.add_subplot(111)
     plt.boxplot(dataToPlot)
     plt.xticks(xNames, colNames)
-    fig.savefig(boxName + '.png', bbox_inches='tight')
+    fig.savefig(boxName + '.svg', bbox_inches='tight')
     return
