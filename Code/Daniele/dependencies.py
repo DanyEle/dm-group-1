@@ -57,6 +57,9 @@ def main():
     
     plot_credit_default_attribute(credit_cards_avg, "age", "ba", size)
     
+    plot_credit_default_attribute(credit_cards_avg, "age", "ps", size)
+
+    
     plot_credit_default_attribute(credit_cards_avg, "age", "limit", size)
     
     #plot how many unique occurrences are of a certain type
@@ -69,7 +72,14 @@ def main():
     
     
     #just an example, can also run it with "ps-jun", "ps-jul", "ps-aug", ...
-    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-apr")
+        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-apr")
+        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-may")
+        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-jun")
+        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-jul")
+        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-aug")
+        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-sep")
+
+
     
     plot_crosstab_credit_default_ps(credit_cards_avg, size, "education")
     
@@ -113,13 +123,18 @@ def plot_group_histogram_attribute(credit_cards_avg, attribute, size, bin_size):
     
     
 def plot_crosstab_credit_default_ps(credit_cards_avg, size, attribute):
+    
+    df = credit_cards_avg
 
     crosstab = pd.crosstab(df[attribute], df['credit_default'])
     # Normalize the cross tab to sum to 1:
     crosstab_normalized = crosstab.div(crosstab.sum(1).astype(float), axis=0)
     
     crosstab_normalized.plot(kind='bar', stacked=True, 
-                   title='Default by Repayment class')
+                   title='Default by ' + str(attribute) + ' class')
+    
+    plt.savefig("/home/daniele/dm-local/ps-default-class.pdf")
+
     
     
 
@@ -250,7 +265,7 @@ def plot_credit_default_attribute(credit_cards_avg, attribute_x, attribute_y, si
 
       #let's show in green the ones that didn't default
     plt.scatter(df[df['credit_default'] == 'no'][attribute_x], 
-            df[df['credit_default'] == 'no'][attribute_y], color='g', marker='*')
+            df[df['credit_default'] == 'no'][attribute_y], color='b', marker='*')
     
     #let's show in red the ones that defaulted
     plt.scatter(df[df['credit_default'] == 'yes'][attribute_x], 
