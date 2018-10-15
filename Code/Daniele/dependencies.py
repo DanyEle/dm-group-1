@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
 
 
 
@@ -29,6 +28,7 @@ def main():
     
     #remember that correlation doesn't make sense on class attributes!
     compute_correlation_between_attributes(credit_cards_avg, ["ba", "pa", "limit", "age"])
+    
     
     #the only significant correlation (0.37) appears to be between limit and pa, and limit and ba (0.31)
     
@@ -72,12 +72,12 @@ def main():
     
     
     #just an example, can also run it with "ps-jun", "ps-jul", "ps-aug", ...
-        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-apr")
-        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-may")
-        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-jun")
-        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-jul")
-        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-aug")
-        plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-sep")
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-apr")
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-may")
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-jun")
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-jul")
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-aug")
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "ps-sep")
 
 
     
@@ -133,7 +133,7 @@ def plot_crosstab_credit_default_ps(credit_cards_avg, size, attribute):
     crosstab_normalized.plot(kind='bar', stacked=True, 
                    title='Default by ' + str(attribute) + ' class')
     
-    plt.savefig("/home/daniele/dm-local/ps-default-class.pdf")
+    plt.savefig("/home/daniele/dm-local/ps-default" + str(attribute) + ".pdf")
 
     
     
