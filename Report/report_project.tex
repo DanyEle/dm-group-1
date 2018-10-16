@@ -353,7 +353,45 @@ We now proceed to focus our analysis on the relation of the "credit\_default" at
 
 From Figure \ref{repayment_ps_apr}, we can see that the higher the ps, the higher is the probability of a default to occur. This behaviour is typical of all the "ps" attributes in the considered dataset. This hence suggests that the "ps" is strongly correlated with the occurrence of a default. 
 
+\section{Syntactic and Semantic Accurance}
+The goal of this analysis is to check if all the values of a specific attribute belong to the column domain and if there are typing error.
+The following table shows for each attribute its type and all (or in part) its values:
 
+\begin{tabular}{ l | l | l }
+\hline
+Name & Tyoe & Values
+limit & int & 10000, 20000,  30000,  40000, ....,   710000, 740000, 750000, 780000 \\
+sex & object & male, female, NaN \\
+education  & object & graduate school, university, high school, others, NaN \\
+status & object & married, single, others, NaN \\
+age & int &  -1, 21, 22, 23, ..., 70, 71, 72, 73, 75 \\
+ps-sep & int &  -2, -1,  0,  1,  2,  3,  4,  5,  6,  7,  8 \\
+ps-aug & int &  -2, -1,  0,  1,  2,  3,  4,  5,  6,  7 \\
+ps-jul & int &  -2, -1,  0, 1,  2,  3,  4,  5,  6,  7,  8 \\
+ps-jun & int &  -2, -1,  0,  2,  3,  4,  5,  6,  7,  8 \\
+ps-may & int &  -2, -1,  0,  2,  3,  4,  5,  6,  7,  8 \\
+ps-apr  & int &  -2, -1,  0,  2,  3,  4,  5,  6,  7,  8 \\
+ba-sep & int &  -14386, -10682,  -9802,  ... , 588000, 604019, 613860 \\
+ba-aug & int &  -69777, -67526, -30000, ... , 577681, 597793, 605943 \\
+ba-jul & int &  -61506, -24702, -15910, ... , 577015, 578971, 597415 \\
+ba-jun & int &  -24303, -15910, -15588, ... , 565669, 569034, 616836 \\
+ba-may & int &  -81334, -61372, -37594, ... , 530672, 551702, 587067 \\
+ba-apr & int &  -209051, -150953,  -57060, ... ,  478034,  527566,  568638 \\
+pa-sep & int &   0, 1, 2, ... , 304815, 323014, 493358 \\
+pa-aug & int &   0, 1, 2, ... , 401003,  580464, 1227082 \\
+pa-jul & int &   0, 1, 2, ... , 349395, 400972, 417588 \\
+pa-jun & int &   0, 1, 2, ... , 291227, 292462, 292962 \\
+pa-may & int &  0, 1, 2, ... , 303512, 331788, 417990 \\
+pa-apr & int &   0, 1, 2 , ... , 403500, 443001, 528666 \\
+credit_defaut & object &  yes, no \\
+\hline
+\end
+	
+From this table it's possible to notice the following problems:
+\begin{enumerate}
+\item The attributes 'Sex', 'Education' and 'Status' have a wrong value: Not a Number;
+\item The attribute 'Age' has a wrong value that is '-1'.
+All others attribute are semantically and syntactically correct!
 	
     
     
