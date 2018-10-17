@@ -74,6 +74,8 @@ def main():
     genders_mapping = dict(zip(sexes, range(0, len(sexes) + 1)))
     cc_NoMV['sex_val'] = cc_NoMV['sex'].map(genders_mapping).astype(int)
     
+    cc_values = sorted(cc_NoMV['credit_default'].unique())
+    
     #FINAL PLOT
     #age_plot2
     qqplot(cc_NoMV.age, 'Age', 'age_final.pdf')
@@ -84,14 +86,14 @@ def main():
     #Age density plot by status
     my_densplot('education', 'Age Density Plot by Status', 'Age')
     
-    #Credit default Rate by Gender
-    my_crosstab(cc['credit_default'], cc['sex_val'], \
-                'Credit default Rate by Gender', sexes)
+    #Gender Rate by Credit default 
+    my_crosstab(cc_NoMV['sex'], cc_NoMV['credit_default'], 
+                'Credit default Rate by Gender', cc_values)
     
-    #Education Rate by Gender
-    my_crosstab(cc['education'], cc['sex_val'], \
-                'Education default Rate by Gender', sexes)
+    #Education Rate by Credit default 
+    my_crosstab(cc_NoMV['education'], cc_NoMV['credit_default'], 
+                'Education default Rate by Gender', cc_values)
     
-    #Status Rate by Gender
-    my_crosstab(cc['status'], cc['sex_val'], \
-                'Status Rate by Gender', sexes)
+    #Status Rate by Credit default
+    my_crosstab(cc_NoMV['status'], cc_NoMV['credit_default'], 
+                'Status Rate by Gender', cc_values)
