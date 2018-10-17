@@ -5,89 +5,93 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 
 
+def remove_missing_values(df_in):
+    df_out = df_in
+    #SEX
+    #fill missing values with the mode of sex (female)
+    df_out['sex'] = df_out['sex'].fillna(df_out['sex'].mode()[0])
+    
+    #EDUCATION
+    df_out['education'] = df_out['education'].fillna('others')
+    
+    #AGE
+    #dataframe without rows where age is -1
+    df_out['age'] = df_out['age'].groupby([df_out['sex'], df_out['education']]).apply( 
+            lambda x: x.replace(-1, x.median()))
+    
+    #STATUS
+    df_out['status'] = df_out['status'].groupby([df_out['sex'], df_out['education']]).apply( 
+      lambda x: x.fillna(x.mode()[0]))
+    
+    return df_out
+
+
 def qqplot(data, y_label, file_name):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     stats.probplot(data, dist="norm", plot=plt)
     ax.get_lines()[0].set_marker('.')
     plt.ylabel(y_label)
-    plt.savefig(file_name, format = 'svg')
+    plt.savefig(file_name, format = 'pdf')
     plt.clf()
-    
+
 
 def my_crosstab(x, y, tit, leg):
     ct = pd.crosstab(x, y)
     pct = ct.div(ct.sum(1).astype(float), axis=0)
     pct.plot(kind='bar', stacked=True, title=tit)
     plt.legend(leg, loc='best')
-    f_name = '_'.join(tit.split()) + '.svg'
-    plt.savefig(f_name, format = 'svg')
+    f_name = '_'.join(tit.split()) + '.pdf'
+    plt.savefig(f_name, format = 'pdf')
     plt.clf()
-    
+
 
 def my_densplot(attr, tit, x_label):
-    attr_values = sorted(cc[attr].unique())
+    attr_values = sorted(cc_NoMV[attr].unique())
     for v in attr_values:
-        cc.age[cc[attr] == v].plot(kind='kde')
+        cc_NoMV.age[cc_NoMV[attr] == v].plot(kind='kde')
     plt.title(tit)
     plt.xlabel(x_label)
     plt.legend(attr_values, loc='best')
-    f_name = '_'.join(tit.split()) + '.svg'
-    plt.savefig(f_name, format = 'svg')
+    f_name = '_'.join(tit.split()) + '.pdf'
+    plt.savefig(f_name, format = 'pdf')
     plt.clf()
 
 
-
-#load dataset into a dataframe
-cc = pd.read_csv("C:\\Users\\Riccardo Manetti\\Desktop\\prova\\credit_default_train.csv")
-cc_org = cc.copy()
-
-
-#INITIAL PLOT
-qqplot(cc.age, 'Age', 'age_initial.svg')
-
-
-#SEX
-#fill missing values with the mode of sex (female)
-cc['sex'] = cc['sex'].fillna(cc['sex'].mode()[0])
-
-sexes = sorted(cc['sex'].unique())
-genders_mapping = dict(zip(sexes, range(0, len(sexes) + 1)))
-cc['sex_val'] = cc['sex'].map(genders_mapping).astype(int)
-
-
-#EDUCATION
-cc['education'] = cc['education'].fillna('others')
-
-
-#AGE
-#dataframe without rows where age is -1
-cc_age = cc[cc['age'] != -1]
-cc['age'] = cc['age'].groupby([cc['sex'], cc['education']]).apply(lambda x: x.replace(-1, x.median()))
-
-
-#STATUS
-cc['status'] = cc['status'].groupby([cc['sex'], cc['education']]).apply(lambda x: x.fillna(x.mode()[0]))
-
-
-#FINAL PLOT
-#age_plot2
-qqplot(cc.age, 'Age', 'age_final.svg')
-
-#Age density plot by education
-my_densplot('education', 'Age Density Plot by Education', 'Age')
-
-#Age density plot by status
-my_densplot('education', 'Age Density Plot by Status', 'Age')
-
-#Credit default Rate by Gender
-my_crosstab(cc['credit_default'], cc['sex_val'], \
-            'Credit default Rate by Gender', sexes)
-
-#Education Rate by Gender
-my_crosstab(cc['education'], cc['sex_val'], \
-            'Education default Rate by Gender', sexes)
-
-#Status Rate by Gender
-my_crosstab(cc['status'], cc['sex_val'], \
-            'Status Rate by Gender', sexes)
+def main():
+    global cc_NoMV
+    
+    #load dataset into a dataframe
+    cc = pd.read_csv('C:\\Users\\Riccardo Manetti\\Desktop\\DM_proj\\credit_default_train.csv')
+    
+    #INITIAL PLOT
+    qqplot(cc.age, 'Age', 'age_initial.pdf')
+    
+    #REMOVE MISSING VALUES
+    cc_NoMV = remove_missing_values(cc) 
+    
+    sexes = sorted(cc_NoMV['sex'].unique())
+    genders_mapping = dict(zip(sexes, range(0, len(sexes) + 1)))
+    cc_NoMV['sex_val'] = cc_NoMV['sex'].map(genders_mapping).astype(int)
+    
+    #FINAL PLOT
+    #age_plot2
+    qqplot(cc_NoMV.age, 'Age', 'age_final.pdf')
+    
+    #Age density plot by education
+    my_densplot('education', 'Age Density Plot by Education', 'Age')
+    
+    #Age density plot by status
+    my_densplot('education', 'Age Density Plot by Status', 'Age')
+    
+    #Credit default Rate by Gender
+    my_crosstab(cc['credit_default'], cc['sex_val'], \
+                'Credit default Rate by Gender', sexes)
+    
+    #Education Rate by Gender
+    my_crosstab(cc['education'], cc['sex_val'], \
+                'Education default Rate by Gender', sexes)
+    
+    #Status Rate by Gender
+    my_crosstab(cc['status'], cc['sex_val'], \
+                'Status Rate by Gender', sexes)
