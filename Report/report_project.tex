@@ -359,8 +359,8 @@ The following table shows for each attribute its type and all (or in part) its v
 
 \begin{tabular}{ l | l | l }
 \hline
-Name & Tyoe & Values
-limit & int & 10000, 20000,  30000,  40000, ....,   710000, 740000, 750000, 780000 \\
+Name & Type & Values\\\hline
+limit & int & 10000, 20000,  30000,  40000, \dots,   710000, 740000, 750000, 780000 \\
 sex & object & male, female, NaN \\
 education  & object & graduate school, university, high school, others, NaN \\
 status & object & married, single, others, NaN \\
@@ -383,15 +383,16 @@ pa-jul & int &   0, 1, 2, ... , 349395, 400972, 417588 \\
 pa-jun & int &   0, 1, 2, ... , 291227, 292462, 292962 \\
 pa-may & int &  0, 1, 2, ... , 303512, 331788, 417990 \\
 pa-apr & int &   0, 1, 2 , ... , 403500, 443001, 528666 \\
-credit_defaut & object &  yes, no \\
+credit\_defaut & object &  yes, no \\
 \hline
-\end
-	
+\end{tabular}\bigskip\\	
 From this table it's possible to notice the following problems:
 \begin{enumerate}
 \item The attributes 'Sex', 'Education' and 'Status' have a wrong value: Not a Number;
 \item The attribute 'Age' has a wrong value that is '-1'.
+\end{enumerate}
 All others attribute are semantically and syntactically correct!
+
 	
     
     
