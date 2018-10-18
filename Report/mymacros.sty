@@ -1,0 +1,306 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mymacros}[28/09/2018 v1.0 My own macros]
+\RequirePackage{tabularx}
+\RequirePackage[svgnames, table]{xcolor}
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\RequirePackage{pgfplotstable}
+\RequirePackage{caption}
+\RequirePackage{siunitx}
+\RequirePackage{hyperref}
+\RequirePackage{amsthm}
+\RequirePackage{amsmath}
+
+% chktex-file 44
+% chktex-file 17
+% chktex-file 36
+% chktex-file 13
+% chktex-file 15
+% chktex-file 29
+% chktex-file 40
+% chktex-file 1
+% chktex-file 8
+\pgfplotsset{compat=newest}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\sisetup{                           % setup siunitx ...
+        round-mode      = places,   % rounds numbers
+        round-precision = 2,        % to 3 places
+        per-mode        = symbol,   % kg/dm^3 instead kgm^{-3}
+      group-four-digits = true,     %   for 1 234,567       
+        }
+
+\definecolor{line1}{HTML}{FF0000}
+\definecolor{line2}{HTML}{0000FF}
+\definecolor{line3}{HTML}{009900}
+\definecolor{line4}{HTML}{B2ABD2}
+\newcommand\y{\cellcolor{green!10}}
+
+\pgfplotsset{
+  every axis/.append style={legend pos=south east,ymin=0,grid=major,
+        major grid style={line width=.2pt,draw=gray,dotted}, axis x line=bottom,
+        no marks,log basis x=2,axis line style=-,
+        cycle list={
+          {draw=line1, thick},
+          {draw=line2, thick},
+          {draw=line3, thick},
+          {draw=line4, thick}
+        }}}
+
+\newcommand{\heatmap}[2]{
+  \setlength{\belowcaptionskip}{-10pt}
+\begin{figure}[!htb]
+    \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      view={0}{90},
+      colorbar,
+      colormap/cool,
+      colorbar style={
+        yticklabel style={anchor=east,xshift=3.25em},
+        yticklabel style={
+          /pgf/number format/.cd,
+            fixed,
+            fixed zerofill,
+        }
+      },
+      enlargelimits=false,
+      axis on top,
+      point meta min = -1,
+      point meta max = 1,
+      ymin=-0.5,
+      ymax=6.5,
+      xmax=6.5,
+      xmin=-0.5,
+      xticklabels={,MAE, RMSE, F1, A, MAP, AUC, NDCG},
+      yticklabels={,MAE, RMSE, F1, A, MAP, AUC, NDCG},
+      xtick={-1,0,1,2,3,4,5,6},
+      ytick={-1,0,1,2,3,4,5,6},
+      xticklabel style={rotate=90, anchor=east},
+    ]
+    \addplot [matrix plot*,point meta=explicit] file [meta=index 2] {#1};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{#2}
+\end{figure}
+}
+
+\newcommand{\addmeasureplot}[6]{
+\begin{figure}[!htb]
+  \centering
+  \begin{tikzpicture}
+    \begin{semilogxaxis}[
+        xlabel=#5,ylabel=correlazione,
+        ymin=-1, ymax=1,
+        xmin=32, xmax=1024,
+        axis y line=left,
+        width=0.85\textwidth,height=.40\textheight]
+     \pgfplotstableread {../Esperimenti/Output/data/#3.#1_#2_#4.txt} \loadtable.
+      \addplot table [x index=0, y index=1] {\loadtable};
+      \addlegendentry{Spearman-Rho}
+      \addplot table [x index=0, y index=2] {\loadtable};
+      \addlegendentry{Kendall-Tau}
+    \end{semilogxaxis}
+  \end{tikzpicture}
+  \caption{#6}
+\end{figure}
+}
+
+\newcommand{\addmeasureplots}[2]{
+  \addmeasureplot{#1}{#2}{1000}{user}{utenti}{Correlazione tra #1 e #2 all'aumentare del numero di utenti, per $1000$ tentativi.}
+  \addmeasureplot{#1}{#2}{10000}{user}{utenti}{Correlazione tra #1 e #2 all'aumentare del numero di utenti, per $10000$ tentativi.}
+  
+  \clearpage
+  
+  \addmeasureplot{#1}{#2}{1000}{item}{oggetti}{Correlazione tra #1 e #2 all'aumentare del numero di oggetti, per $1000$ tentativi.}
+  \addmeasureplot{#1}{#2}{10000}{item}{oggetti}{Correlazione tra #1 e #2 all'aumentare del numero di oggetti, per $10000$ tentativi.}
+  
+  \clearpage
+  
+  \addmeasureplot{#1}{#2}{1000}{both}{utenti e oggetti}{Correlazione tra #1 e #2 all'aumentare sia del numero di utenti che di oggetti, per $1000$ tentativi}
+  \addmeasureplot{#1}{#2}{10000}{both}{utenti e oggetti}{Correlazione tra #1 e #2 all'aumentare sia del numero di utenti che di oggetti, per $10000$ tentativi}
+}
+
+\pgfplotstableset{
+  color cells/.style={
+  col sep=space,
+  string type,
+  postproc cell content/.code={%
+    \pgfkeysalso{%
+        @cell content=\rule{0cm}{1.5ex}%
+        \pgfmathsetmacro\number{int(##1)}%
+        \ifnum\number>0\edef\setcolor{\noexpand\cellcolor{green!\number!red!15}}\setcolor\fi%
+        ##1}%
+    },
+    display columns/0/.style={
+        column name=\bf CMAE,
+        column type ={l} 
+      },
+      display columns/1/.style={
+		    column name=\bf CRMSE,
+		    column type = {l}
+      },
+      display columns/2/.style={
+        column name=$\bf F_1$,
+		    column type = {l}
+      }, 
+      display columns/3/.style={
+        column name=\bf ACC,
+        column type = {l}
+      }, 
+      display columns/4/.style={
+        column name=\bf MAP,
+		    column type = {l}
+      },
+      display columns/5/.style={
+        column name=\bf AUC,
+        column type = {l}
+      },
+      display columns/6/.style={
+        column name=\bf NDCG,
+        column type = {l|}
+      },
+      columns/x/.style={
+      column name={},
+      postproc cell content/.code={}
+    }
+  }
+}
+
+
+\newcommand{\addCorrTable}[3]{
+\begin{table}[ht]
+  \begin{center}
+        \begin{tabular}{|l|}
+            \hline
+            \\
+            \hline
+            \bf CMAE \\
+            \bf CRMSE \\
+            $\bf F_1$ \\
+            \bf ACC \\
+            \bf MAP\\
+            \bf AUC\\
+            \bf NDCG\\
+            \hline
+      \end{tabular}%
+    \pgfplotstabletypeset[
+      color cells,
+      every head row/.style={
+		    before row={\hline}, % have a rule at top
+        after row={\hline},
+		  },
+		  every last row/.style={after row=\hline}, % rule at bottom
+      %every last column/.style={column type/.add={}{|}},
+  ]{../Esperimenti/Output/data/#1}
+  \end{center}
+  \caption{#2}\label{#3}
+\end{table}
+}
+
+\newcommand{\addRomani}{
+  \begin{table}[h!]
+  \begin{center} 
+    \begin{tabular}{| l | l l | l l | l l l |}
+        \hline
+        & \bf CMAE & \bf CRMSE & $ \bf F_1$ & \bf ACC & \bf MAP & \bf AUC & \bf NDCG \\ \hline
+        \bf CMAE & \y$100$ & \y$90.2$ & $93.4$ & $98.1$ & $86.5$ & $88.6$ & $80.2$\\ 
+        \bf CRMSE & \y$90.2$ & \y$100$ &  $75.3$ & $83.8$ & $91.7$ & $92.9$ & $88.$\\ \hline 
+        $\bf F_1$ & $93.4$ & $75.3$ & \y$100$ & \y$96.5$ & $69.6$ & $72.7$ & $61.8$\\ 
+        \bf ACC & $98.1$ & $83.8$ & \y$96.5$ & \y$100$ & $79.9$ & $82.2$ & $72.4$\\ \hline 
+        \bf MAP & $86.5$ & $91.7$ & $69.6$ & $79.9$ & \y$100$ & \y$99.3$ & \y$98.2$\\ 
+        \bf AUC & $88.6$ & $92.9$ & $72.7$ & $82.2$ & \y$99.3$ & \y$100$ & \y$96.8$\\ 
+        \bf NDCG & $80.2$ & $88.$ & $61.8$ & $72.4$ & \y$98.2$ & \y$96.8$ & \y$100$\\ 
+        \hline
+      \end{tabular}
+  \end{center}
+    \caption{Tabella che rappresenta la correlazione tra le metriche presentate nel \Cref{misure} nel caso di matrici a valori nell'intervallo $[0,5]$~\cite{romani2018}}\label{romani}
+\end{table}
+}
+
+%\newmdenv[ % Define mdframe settings and store as leftrule
+%  linecolor=bluish,
+%  topline=false,
+%  bottomline=false,
+%  rightline=false,
+%  skipabove=\topsep,
+%  skipbelow=\topsep]{leftrule}
+
+%\NewDocumentEnvironment{example}{O{\emph{Esempio:}}} % Define example environment
+%{\begin{leftrule}\noindent\textcolor{bluish}{#1}\par}
+%{\end{leftrule}}
+
+%\newcommand\finline[3][]{\begin{myfont}[#1]{#2}#3\end{myfont}}%
+%\addto\captionsitalian{\renewcommand{\appendixname}{Allegato}}
+%\newcommand{\xmark}{\ding{55}}%
+
+\hypersetup{
+  pdfborder = {0 0 0}
+}
+
+\newtheoremstyle{thm}% name of the style to be used
+  {3pt}% measure of space to leave above the theorem. E.g.: 3pt
+  {3pt}% measure of space to leave below the theorem. E.g.: 3pt
+  {\itshape}% name of font to use in the body of the theorem
+  {0pt}% measure of space to indent
+  {\bfseries}% name of head font
+  {}% punctuation between head and body
+  { }% space after theorem head; " " = normal interword space
+  {\thmname{#1}\thmnumber{ #2} \thmnote{\bf (#3)}\\}% Manually specify head
+  
+\newtheoremstyle{def}% name of the style to be used
+  {3pt}% measure of space to leave above the theorem. E.g.: 3pt
+  {3pt}% measure of space to leave below the theorem. E.g.: 3pt
+  {\normalfont}% name of font to use in the body of the theorem
+  {0pt}% measure of space to indent
+  {\bfseries}% name of head font
+  {}% punctuation between head and body
+  { }% space after theorem head; " " = normal interword space
+  {\thmname{#1}\thmnumber{ #2} \thmnote{\bf (#3)}\\}% Manually specify head
+  
+%\newcommand\stareq{\stackrel{\mathclap{\normalfont\mbox{*}}}{=}}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\makeatletter
+\newcommand{\oset}[3][0ex]{%
+  \mathrel{\mathop{#3}\limits^{
+    \vbox~to#1{\kern-2\ex@%
+    \hbox{$\scriptstyle#2$}\vss}}}}
+\makeatother
+
+%\theoremstyle{thm}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposizione}
+\newtheorem{corollary}[theorem]{Corollario}
+\newtheorem{property}[theorem]{Proprietà}
+%\theoremstyle{def}
+\newtheorem{definition}{Definizione}[section]
+
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{automata,positioning}
+
+\newcommand{\overtilde}[1]{\mathpalette\overtildex{#1}}
+\newcommand{\overtildesym}{\sim}
+%\makeatletter
+\newcommand{\overtildex}[2]{
+  \ifx\displaystyle#1\oset[-0.95ex]{\overtildesym}{#2\vphantom{i}}\fi
+  \ifx\textstyle#1\oset[-.7ex]{\overtildesym}{#2\vphantom{i}}\fi
+  \ifx\scriptstyle#1\oset[-.6ex]{\overtildesym}{#2\vphantom{i}}\fi
+  \ifx\scriptscriptstyle#1\oset[-.3ex]{\overtildesym}{#2\vphantom{i}}\fi
+}
+%\makeatother
+
+%\tikzstyle{block} = [draw, fill=blue!20, rectangle, 
+%    minimum height=3em, minimum width=6em, align=center]
+%\tikzstyle{dblock} = [block,double,double distance = 0.1em]
+%\tikzstyle{sblock} = [block,dashed]
+%\tikzstyle{sum} = [draw, fill=blue!20, circle, node distance=1cm]
+%\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+%\tikzstyle{nlabel} = [above,pos=0.5,anchor=center,align=center]
+%\tikzstyle{nslabel} = [nlabel,sloped]
+%\tikzstyle{label} = [nlabel,fill=white,inner sep=1pt]
+%\tikzstyle{slabel} = [label,sloped]
+%\tikzstyle{arr} = [->, rounded corners]
+
