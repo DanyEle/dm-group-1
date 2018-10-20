@@ -4,6 +4,7 @@ from plots import printPlots
 sys.path.insert(0, '../Riccardo')
 from MissingValues_2 import remove_missing_values
 from outliers import countOutliers
+from outliers import removeOutliers
 import pandas as pd
 
 
@@ -118,16 +119,20 @@ def countAll(cc, k):
 filePath = "../../Dataset/credit_default_train.csv"
 newPath = "boxplots/"
 newPathNoMV = "boxplots/NoMissingValues/"
+newPathNoO = "boxplots/NoOutliers/"
+if not os.path.exists(newPathNoO):
+    os.makedirs(newPathNoO)
 if not os.path.exists(newPath):
     os.makedirs(newPath)
 if not os.path.exists(newPathNoMV):
     os.makedirs(newPathNoMV)
 
-figExtension = "png"
-#figExtension = "pdf"
+#figExtension = "png"
+figExtension = "pdf"
 #figExtension = "svg"
 dataFrame = pd.read_csv(filePath)
 dataFrameNoMV = remove_missing_values(dataFrame)
+dataNew = removeOutliers(dataFrameNoMV)
 
 #Plotting dataset
 generatePlots(newPath, filePath)
@@ -137,6 +142,9 @@ generatePlots(newPathNoMV, dataFrameNoMV, 1)
 
 #Plotting dataset without missing values on a logarithmic scale
 generatePlots(newPathNoMV, dataFrameNoMV, 1, 1)
+
+#Plotting dataset without missing values and outliers
+generatePlots(newPathNoMV, dataNew, 1)
 
 #Counting outliers
 

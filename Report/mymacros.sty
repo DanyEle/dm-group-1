@@ -7,7 +7,7 @@
 \RequirePackage{pgfplotstable}
 \RequirePackage{caption}
 \RequirePackage{siunitx}
-\RequirePackage{hyperref}
+%\RequirePackage{hyperref}
 \RequirePackage{amsthm}
 \RequirePackage{amsmath}
 
@@ -234,10 +234,6 @@
 %\addto\captionsitalian{\renewcommand{\appendixname}{Allegato}}
 %\newcommand{\xmark}{\ding{55}}%
 
-\hypersetup{
-  pdfborder = {0 0 0}
-}
-
 \newtheoremstyle{thm}% name of the style to be used
   {3pt}% measure of space to leave above the theorem. E.g.: 3pt
   {3pt}% measure of space to leave below the theorem. E.g.: 3pt
@@ -304,3 +300,20 @@
 %\tikzstyle{slabel} = [label,sloped]
 %\tikzstyle{arr} = [->, rounded corners]
 
+
+\newcommand{\addoneplot}[4]{
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=#1\textwidth]{#2}
+  \caption{#3}\label{#4}
+\end{figure}
+}
+
+\newcommand{\addtwoplots}[6]{
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=#1\textwidth]{#2}
+    \includegraphics[width=#3\textwidth]{#4}
+  \caption{#5}\label{#6}
+\end{figure}
+}

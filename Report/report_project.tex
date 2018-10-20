@@ -7,6 +7,7 @@
 \usepackage{cancel}
 %% Sets page size and margins
 \usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
+\usepackage{mymacros}
 \usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{listings}
@@ -97,17 +98,20 @@ These boxplots are created with Python and give us the chance to understand the 
                          %~~~~~~~~~%
 \subsubsection{Age}
 From this plot we can observe that age has some values below $0$. We can assume that the values allowed for this field are strictly positive.
+
+\addplot{0.7}{../Code/Gemma/boxplots/age.png}{Caption}{fig:age}
+
 \begin{center}
-\includegraphics[width=0.9\textwidth]{../Code/boxPlotsGemma/boxplots/age.png}
+\includegraphics[width=0.9\textwidth]{../Code/Gemma/boxplots/age.png}
 \end{center}
                          %~~~~~~~~~%
 \subsubsection{Limit}
 Since the dataset takes into account Taiwanese dollars ($\sim 0,028$ €) plotting the boxplot in terms of multiples of the average Taiwanese income (NTD $49989$, about USD $1700$) is more informative.
 \begin{center}
-\includegraphics[width=0.48\textwidth]{../Code/boxPlotsGemma/boxplots/limit.png}
+\includegraphics[width=0.48\textwidth]{../Code/Gemma/boxplots/limit.png}
 \todo{Daniele: plot limitS.png is missing}
 
-%\includegraphics[width=0.45\textwidth]{../Code/boxPlotsGemma/boxplots/limitS.png}
+%\includegraphics[width=0.45\textwidth]{../Code/Gemma/boxplots/limitS.png}
 \end{center}
 From this plot we may observe that on average the limit of the credit card plafond is $2.5$ times the average income.
                          %~~~~~~~~~%
@@ -116,14 +120,14 @@ This values represents the balance of the bank account during the previous billi
 I can't understand what all these outlayers mean!!!
 \todo{I can't understand}
 \begin{center}
-\includegraphics[width=0.9\textwidth]{../Code/boxPlotsGemma/boxplots/ba.png}
+\includegraphics[width=0.9\textwidth]{../Code/Gemma/boxplots/ba.png}
 \end{center}
                          %~~~~~~~~~%
 \subsubsection{Amount of previous payments}
 This values tell us how much the user spent each month in the past 6 months, on a monthly basis.
 \todo{Non capisco\\:-C}
 \begin{center}
-\includegraphics[width=0.9\textwidth]{../Code/boxPlotsGemma/boxplots/pa.png}
+\includegraphics[width=0.9\textwidth]{../Code/Gemma/boxplots/pa.png}
 \end{center}
                          %~~~~~~~~~%
 \subsubsection{Payment status}
@@ -150,7 +154,7 @@ This columns of the database contain the history of payments, more precisely:
   \item[\sc Paid nine months later or more]$\rightarrow$ value $9$
 \end{description}
 \begin{center}
-\includegraphics[width=0.9\textwidth]{../Code/boxPlotsGemma/boxplots/ps.png}
+\includegraphics[width=0.9\textwidth]{../Code/Gemma/boxplots/ps.png}
 \end{center}
 \todo{Direi che questo lo togliamo\\\ldots???}
 
