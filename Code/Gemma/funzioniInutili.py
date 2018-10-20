@@ -15,6 +15,17 @@ def findMeanIndex(array):
     return int(meanIndex)
 
 
+def findMedian(array):
+    if (len(array) % 2 == 0):
+        pos = int(len(array) / 2)
+        return array[pos], pos
+    else:
+        left = int(len(array) // 2)
+        right = int(left + 1)
+        pos = (array[left] + array[right]) / 2
+        return pos, left
+
+
 """Questa funzione ritorna il valore dello spread del vettore myCol, a seconda del tipo desiderato (kind). Kind può valere "range", "irange" o "variance" """
 
 
