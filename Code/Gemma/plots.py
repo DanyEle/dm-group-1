@@ -1,5 +1,5 @@
 #EXAMPLE OF USAGE: see file example.py
-
+import math
 import numpy as np
 import matplotlib as mpl
 mpl.use('agg')
@@ -10,12 +10,12 @@ import pandas as pd
 
 def highlightColumn(filePath, colName, pandas=None):
     if ((colName == "sex") | (colName == "education") | (colName == "status") |
-        (colName == "credit_default")):
+        (colName == "credit_default") | (colName == "ps-sep") |
+        (colName == "ps-aug") | (colName == "ps-jul") | (colName == "ps-jun") |
+        (colName == "ps-may") | (colName == "ps-apr")):
         print("Cannot print boxplot from non numerical data\n")
         return -1
     if ((colName != "limit") & (colName != "age") & (colName != "ps-sep") &
-        (colName != "ps-sep") & (colName != "ps-aug") & (colName != "ps-jul") &
-        (colName != "ps-jun") & (colName != "ps-may") & (colName != "ps-apr") &
         (colName != "ba-sep") & (colName != "ba-sep") & (colName != "ba-aug") &
         (colName != "ba-jul") & (colName != "ba-jun") & (colName != "ba-may") &
         (colName != "ba-apr") & (colName != "pa-sep") & (colName != "pa-sep") &
@@ -33,18 +33,6 @@ def highlightColumn(filePath, colName, pandas=None):
                 col = 0
             if (colName == "age"):
                 col = 4
-            if (colName == "ps-sep"):
-                col = 5
-            if (colName == "ps-aug"):
-                col = 6
-            if (colName == "ps-jul"):
-                col = 7
-            if (colName == "ps-jun"):
-                col = 8
-            if (colName == "ps-may"):
-                col = 9
-            if (colName == "ps-apr"):
-                col = 10
             if (colName == "ba-sep"):
                 col = 11
             if (colName == "ba-aug"):
@@ -88,7 +76,8 @@ def printPlots(boxName,
                howMany,
                colNames,
                flag=None,
-               pandas=None):
+               pandas=None,
+               log=None):
     if howMany == 0:
         return
     dataToPlot = []
@@ -97,13 +86,26 @@ def printPlots(boxName,
     for i in range(0, howMany):
         colName = colNames[i]
         currCol = highlightColumn(filePath, colName, pandas)
-        if flag:
-            if colName == "limit":
-                myInt = 49989
-                newCol = [x / myInt for x in currCol]
+        if (log):
+            if (not ((colName == "ba-sep") & (colName == "ba-aug") &
+                     (colName == "ba-jul") & (colName == "ba-jun") &
+                     (colName == "ba-may") & (colName == "ba-apr") &
+                     (colName == "pa-sep") & (colName == "pa-aug") &
+                     (colName == "pa-jul") & (colName == "pa-jun") &
+                     (colName == "pa-may") & (colName == "pa-apr"))):
+                #Since the logarithm is defined only fo positive numbers
+                newCol = [math.log(int(x)) for x in currCol]
                 dataToPlot.append(newCol)
+                boxName = boxName + "Log"
         else:
-            dataToPlot.append(currCol)
+            if flag:
+                if colName == "limit":
+                    myInt = 49989
+                    newCol = [x / myInt for x in currCol]
+                    dataToPlot.append(newCol)
+                    boxName = boxName + "Salary"
+            else:
+                dataToPlot.append(currCol)
         xNames.append(i + 1)
     fig = plt.figure(1, figsize=(9, 6))
     pix = fig.add_subplot(111)
