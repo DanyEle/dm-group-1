@@ -144,7 +144,7 @@ generatePlots(newPathNoMV, dataFrameNoMV, 1)
 generatePlots(newPathNoMV, dataFrameNoMV, 1, 1)
 
 #Plotting dataset without missing values and outliers
-generatePlots(newPathNoMV, dataNew, 1)
+generatePlots(newPathNoO, dataNew, 1)
 
 #Counting outliers
 
