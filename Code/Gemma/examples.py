@@ -144,9 +144,9 @@ generatePlots(newPathNoMV, dataFrameNoMV, 1)
 generatePlots(newPathNoMV, dataFrameNoMV, 1, 1)
 
 #Plotting dataset without missing values and outliers
+print("Shape of dataset without outliers: ", dataNew.shape)
 generatePlots(newPathNoO, dataNew, 1)
 
 #Counting outliers
-
-k = 1.5
-countAll(dataFrameNoMV, k)
+#k = 1.5
+#countAll(dataFrameNoMV, k)
