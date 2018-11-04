@@ -30,6 +30,6 @@ def removeOutliers(dataFrame):
             (int(paAug[i]) > 1200000)):
             rows.append(i)
     print("Number of rows to be dropped: ", len(rows))
-    for i in range(0, len(rows)):
-        dataFrame.drop(dataFrame.index[rows[i]], inplace=True)
+    dataFrame.drop(dataFrame.index[rows], inplace=True)
+    print("size: ", len(dataFrame))
     return dataFrame
