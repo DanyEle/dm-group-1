@@ -30,19 +30,38 @@ def generatePlots(newpath, filePath, pandas=None, log=None):
                pandas, log)
 
     #Example of boxplot of ba values
-    baNames = ["ba-sep", "ba-aug", "ba-jul", "ba-jun", "ba-may", "ba-apr"]
+    baNames = ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"]
     baBox = newpath + "ba"
     howManyBa = 6
     printPlots(baBox, figExtension, filePath, howManyBa, baNames, None, pandas,
                None)
     #logarith is undefined for negative values
 
+    #Example of boxplot of ba values reverse order
+    baNamesReverse = [
+        "ba-sep", "ba-aug", "ba-jul", "ba-jun", "ba-may", "ba-apr"
+    ]
+    baBox = newpath + "baReverse"
+    howManyBa = 6
+    printPlots(baBox, figExtension, filePath, howManyBa, baNamesReverse, None,
+               pandas, None)
+    #logarith is undefined for negative values
+
     #Example of boxplot of pa values
-    paNames = ["pa-sep", "pa-aug", "pa-jul", "pa-jun", "pa-may", "pa-apr"]
+    paNames = ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
     paBox = newpath + "pa"
     howManyPa = 6
     printPlots(paBox, figExtension, filePath, howManyPa, paNames, None, pandas,
                None)
+
+    #Example of boxplot of pa values in reverse order
+    paNamesReverse = [
+        "pa-sep", "pa-aug", "pa-jul", "pa-jun", "pa-may", "pa-apr"
+    ]
+    paBox = newpath + "paReverse"
+    howManyPa = 6
+    printPlots(paBox, figExtension, filePath, howManyPa, paNamesReverse, None,
+               pandas, None)
     return
 
 
@@ -131,8 +150,10 @@ if not os.path.exists(newPathNoMV):
 figExtension = "pdf"
 #figExtension = "svg"
 dataFrame = pd.read_csv(filePath)
-dataFrameNoMV = remove_missing_values(dataFrame)
-dataNew = removeOutliers(dataFrameNoMV)
+deep1 = dataFrame.copy()
+deep2 = dataFrame.copy()
+dataFrameNoMV = remove_missing_values(deep1)
+dataNew = removeOutliers(deep2)
 
 #Plotting dataset
 generatePlots(newPath, filePath)
@@ -140,6 +161,7 @@ generatePlots(newPath, filePath)
 #Plotting dataset without missing values
 generatePlots(newPathNoMV, dataFrameNoMV, 1)
 
+print("Shape of dataset without missing values: ", dataFrameNoMV.shape)
 #Plotting dataset without missing values on a logarithmic scale
 generatePlots(newPathNoMV, dataFrameNoMV, 1, 1)
 

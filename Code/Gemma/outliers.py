@@ -24,10 +24,13 @@ def removeOutliers(dataFrame):
     baMay = getattr(dataFrame, "ba-may")
     baApr = getattr(dataFrame, "ba-apr")
     paAug = getattr(dataFrame, "pa-aug")
+    paApr = getattr(dataFrame, "pa-apr")
+    paMay = getattr(dataFrame, "pa-may")
     rows = []
     for i in range(0, len(baMay)):
         if ((int(baMay[i]) < -5000) | (int(baApr[i]) < -5000) |
-            (int(paAug[i]) > 1200000)):
+            (int(paAug[i]) > 500000) | (int(paApr[i]) > 500000) |
+            (int(paMay[i]) > 400000)):
             rows.append(i)
     print("Number of rows to be dropped: ", len(rows))
     dataFrame.drop(dataFrame.index[rows], inplace=True)
