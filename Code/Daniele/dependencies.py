@@ -9,6 +9,9 @@ def main():
     #load dataset into a dataframe
     credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     
+    #remember: load the corresponding function from Riccardo's scripts
+    credit_cards = remove_missing_values(credit_cards)
+        
     column_names = credit_cards.columns
     #ba = balance[Continuous]
     columns_ba = ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"]
@@ -23,12 +26,25 @@ def main():
     
     pd.set_option('display.max_columns', 30)
     
+    #filename  = open("outputfile",'w')
+    #sys.stdout = filename
+    
     #get some basic statistics about the attributes
-    credit_cards_avg.describe()
+    print(credit_cards.describe())
     
     #remember that correlation doesn't make sense on class attributes!
+    
+    ######CORRELATION!!
+    
     compute_correlation_between_attributes(credit_cards_avg, ["ba", "pa", "limit", "age"])
     
+    compute_correlation_between_attributes(credit_cards_avg, columns_ba)
+        
+    compute_correlation_between_attributes(credit_cards_avg, columns_pa)
+    
+    compute_correlation_between_attributes(credit_cards_avg, columns_ps)
+    
+
     
     #the only significant correlation (0.37) appears to be between limit and pa, and limit and ba (0.31)
     
@@ -36,6 +52,11 @@ def main():
     #clearly, the BA columns are strongly correlated to one another, but the PA columns are not very much correlated to PAs
     compute_correlation_between_attributes(credit_cards_avg, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"])
         
+    
+    plot_average_all_months(12, credit_cards, columns_pa, "Average Payment Amount over Months", "pa")
+    
+    plot_average_all_months(12, credit_cards, columns_ba, "Average Bill Amount over Months", "ba")
+    
     plot_average_ba_pa_all_months(size, credit_cards, columns_ba, columns_pa, columns_ps)     
     
     plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue", "purple", "red", "orange"), size, "education")    
@@ -45,7 +66,6 @@ def main():
     plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue"), size, "age") 
     
     plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue", "purple", "red" ), size, "status")    
-
        
     #now try to make a scatter plot between the expenses and the balance
     #scatter_plot_attribute_columns(credit_cards_avg["pa"], credit_cards_avg["ba"], True)
@@ -58,8 +78,7 @@ def main():
     plot_credit_default_attribute(credit_cards_avg, "age", "ba", size)
     
     plot_credit_default_attribute(credit_cards_avg, "age", "ps", size)
-
-    
+        
     plot_credit_default_attribute(credit_cards_avg, "age", "limit", size)
     
     #plot how many unique occurrences are of a certain type
@@ -185,22 +204,40 @@ def plot_histogram_per_attribute(credit_cards_avg, size):
     df = credit_cards_avg
 
     plt.subplot2grid(fig_dims, (0, 0))
-    df['age'].hist()
+    
+    plt.hist(df['age'], bins=20, normed=True, alpha=0.5,
+         histtype='stepfilled', color='steelblue',
+         edgecolor='none')
     plt.title('Age Histogram')
     
+    
+    
     plt.subplot2grid(fig_dims, (0, 1))
-    df['ba'].hist()
-    plt.title('Average Balance Histogram')
+    plt.hist(df['ba'], bins=15, alpha=0.5,
+         histtype='stepfilled', color='steelblue',
+         edgecolor='none')
+    plt.title('Average Billing Amount Histogram')
+    
     
     plt.subplot2grid(fig_dims, (1, 0))
-    df['pa'].hist()
-    plt.title('Average Expenses Histogram')
+    plt.hist(df['pa'], bins=150, alpha=0.5,
+         histtype='stepfilled', color='steelblue',
+         edgecolor='none')
+    plt.xlim(0, 40000)
+    plt.title('Average Payment Amount Histogram')
+    
+    
     
     plt.subplot2grid(fig_dims, (1, 1))
-    df['limit'].hist()
+    
+    plt.hist(df['limit'], alpha=0.5,
+         histtype='stepfilled', color='steelblue',
+         edgecolor='none')
+    plt.title('Average Limit Histogram')
+    
     plt.title('Limit Histogram')
     
-    plt.savefig("/home/daniele/dm-local/age_balance_expenses_limit_hist.pdf")
+    plt.savefig("/home/daniele/dm-local/age_ba_pa_limit_hist.pdf")
 
     
     
@@ -254,15 +291,6 @@ def plot_count_per_discrete_attribute(credit_cards_avg, size):
 def plot_credit_default_attribute(credit_cards_avg, attribute_x, attribute_y, size):
      #and now let's plot some more relevant stuff, like who didn't repay based on different factors
     df = credit_cards_avg
-    
-    plt.xlabel=attribute_x
-    plt.ylabel=attribute_y
-    
-    #plt.xticks([45], [attribute_x])
-    
-   # plt.yticks([150000], [attribute_y])
-
-
       #let's show in green the ones that didn't default
     plt.scatter(df[df['credit_default'] == 'no'][attribute_x], 
             df[df['credit_default'] == 'no'][attribute_y], color='b', marker='*')
@@ -271,6 +299,10 @@ def plot_credit_default_attribute(credit_cards_avg, attribute_x, attribute_y, si
     plt.scatter(df[df['credit_default'] == 'yes'][attribute_x], 
             df[df['credit_default'] == 'yes'][attribute_y], color='r')
     
+    plt.title("Scatter plot of the " + attribute_x + " and " + attribute_y + " attributes")
+    
+    
+    plt.legend(('credit_default == yes', 'credit_default == no'))    
 
     plt.savefig("/home/daniele/dm-local/scatter_plot_" + attribute_x + "_" + attribute_y + ".pdf")
 
@@ -335,7 +367,7 @@ def plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, colors, siz
     #Expected dependency: the higher the degree, the higher the balance 
     #Actual dependency: not completely true! People that have gone to graduate school may have lots of loans to pay back
     #so their balance is actually smaller than people who attended university
-    compute_average_value_given_attribute_and_columns(credit_cards, columns_ba, attribute, colors, fig_dims, (0,0), ("Average Customer Balance wrt. " + attribute))
+    compute_average_value_given_attribute_and_columns(credit_cards, columns_ba, attribute, colors, fig_dims, (0,0), ("Average Bill Amount wrt. " + attribute))
     
     #The fact above is further confirmed by the fact that the average age of people in the dataset is 32 y.o.
     #so, they haven't had much time to "accumulate" money
@@ -345,11 +377,11 @@ def plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, colors, siz
     #Expended dependency: the higher the degree, the higher the salary
     #Actual dependency: this is true. In fact, people attending graduate school specialize in a field and 
     #consequently earn a higher salary, on average. 
-    compute_average_value_given_attribute_and_columns(credit_cards, columns_pa, attribute, colors, fig_dims, (0,1), ("Average Customer Payment wrt. " + attribute))
+    compute_average_value_given_attribute_and_columns(credit_cards, columns_pa, attribute, colors, fig_dims, (0,1), ("Average Payment Amount wrt. " + attribute))
     
     #compute_average_value_given_attribute_and_columns(credit_cards, columns_ps, attribute, colors, fig_dims, (1,0), "Customer Repayment wrt. Education")
     
-    figurePrint.savefig("/home/daniele/dm-local/ " + attribute + "_plot.pdf", bbox_inches='tight')
+    figurePrint.savefig("/home/daniele/dm-local/" + attribute + "_plot.pdf", bbox_inches='tight')
 
     
     
@@ -359,9 +391,9 @@ def plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, colors, siz
 
 #example call: 
 #compute_average_value_given_attribute_and_columns(credit_cards, columns_balance, "education")
-def compute_average_value_given_attribute_and_columns(data_frame, columns_df, attribute, colors, fig_dims, coordinates, title):
+def compute_average_value_given_attribute_and_columns(credit_cards, columns_df, attribute, colors, fig_dims, coordinates, title):
     #firstly, group by education type
-    group_attribute = data_frame.groupby(attribute)
+    group_attribute = credit_cards.groupby(attribute)
     
     #get the mean value of all rows in each column[just columns, no rows]
     mean_attribute_value = group_attribute.mean()
@@ -370,29 +402,27 @@ def compute_average_value_given_attribute_and_columns(data_frame, columns_df, at
     #ex: group by the different education types if passing "education"
     grouped_values_by_attribute = mean_attribute_value[columns_df]
     
-    #values_per_unique_column_entry contains the mean value of every type of unique attribure over allthe different months
-    #considered 
-    #ex: mean of the columns grouped by the education type 
-    values_per_unique_column_entry = []
+   #let's now sum all the columns in the dataframe
+   
+    grouped_values_by_attribute['mean'] = grouped_values_by_attribute[columns_df].sum(axis=1) / len(columns_df)
+   
+    values_mean_y_axis = list(grouped_values_by_attribute['mean'])
     
-    for index in range(len(grouped_values_by_attribute)):
-        mean_attribute_type = 0
-        for column in columns_df:
-            mean_attribute_type += grouped_values_by_attribute[index:(index+1)][column]
-        mean_attribute_type = mean_attribute_type / len(columns_df)
-        values_per_unique_column_entry.append(mean_attribute_type.mean())
-       
-    #now get the different unique types found
-    unique_column_values = list(grouped_values_by_attribute.index)
-    
-   # for i in range(len(values_per_unique_column_entry)):
-    #    print("Average value of " + unique_column_values[i] + " is " + str(values_per_unique_column_entry[i]))
+    values_mean_x_axis = credit_cards[attribute].unique()
+   
     plt.subplot2grid(fig_dims, coordinates)
     plt.title(title)
      
-    return(plt.bar(x=unique_column_values, height=values_per_unique_column_entry, color=colors))
+    return(plt.bar(x=values_mean_x_axis, height=values_mean_y_axis, color=colors))
      
     
+    
+def plot_average_all_months(size, credit_cards, columns_input, title, file_name):
+    figurePrint = plt.figure(figsize=(size, size)) 
+    plot_avg_single_plot(columns_input, credit_cards, title, plt)
+    plt.savefig("/home/daniele/dm-local/average_" + file_name + "_months.pdf", bbox_inches='tight')
+        
+        
     
 def plot_average_ba_pa_all_months(size, credit_cards, columns_ba, columns_pa, columns_ps):
     figurePrint = plt.figure(figsize=(size, size)) 
@@ -410,6 +440,16 @@ def plot_average_ba_pa_all_months(size, credit_cards, columns_ba, columns_pa, co
     figurePrint.savefig("/home/daniele/dm-local/average_months.pdf", bbox_inches='tight')
         
         
+        
+    
+def plot_avg_single_plot(list_columns, credit_cards, title, plt):    
+    mean_list = []
+    for column in list_columns:
+        mean_column = credit_cards[column].mean()
+        mean_list.append(mean_column)
+    months = ["April", "May", "June", "July", "August", "September"]
+    plt.title(title)
+    return (plt.scatter(x=months, y = mean_list))
         
 
 def plot_average_given_columns(list_columns, credit_cards, fig_dims, coordinates, title, plt):    
@@ -442,6 +482,29 @@ def compute_mean_std_for_columns(list_columns, data_frame):
     
     
     
+#Riccardo's function
+    
+
+def remove_missing_values(df_in):
+    df_out = df_in
+    #SEX
+    #fill missing values with the mode of sex (female)
+    df_out['sex'] = df_out['sex'].fillna(df_out['sex'].mode()[0])
+    
+    #EDUCATION
+    df_out['education'] = df_out['education'].fillna('others')
+    
+    #STATUS
+    df_out['status'] = df_out['status'].groupby([df_out['sex'], df_out['education']]).apply( 
+      lambda x: x.fillna(x.mode()[0]))
+    
+    #AGE
+    #dataframe without rows where age is -1
+    df_out['age'] = df_out['age'].groupby([df_out['sex'], df_out['education'],
+      df_out['status']]).apply(lambda x: x.replace(-1, x.median()))
+    
+    return df_out
+
 
 
 
