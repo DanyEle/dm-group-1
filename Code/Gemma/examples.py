@@ -1,6 +1,7 @@
 import os
 import sys
 from plots import printPlots
+from plots import plotNumOutliers
 sys.path.insert(0, '../Riccardo')
 from MissingValues_2 import remove_missing_values
 from outliers import countOutliers
@@ -66,69 +67,90 @@ def generatePlots(newpath, filePath, pandas=None, log=None):
 
 
 def countAll(cc, k):
+    numOutliers = []
     totalLength = len(cc.limit)
     print("Lines in dataset: ", totalLength)
 
     limit = countOutliers(cc, "limit", k)
     print("Outliers in limit: ", limit)
+    numOutliers.append(limit)
 
     age = countOutliers(cc, "age", 1)
     print("Outliers in age: ", age)
-
-    pssep = countOutliers(cc, "ps-sep", k)
+    numOutliers.append(age)
+    """pssep = countOutliers(cc, "ps-sep", k)
     print("Outliers in ps-sep: ", pssep)
-
+    numOutliers.append(pssep)
+    
     psaug = countOutliers(cc, "ps-aug", k)
     print("Outliers in ps-aug: ", psaug)
-
+    numOutliers.append(psaug)
+    
     psjul = countOutliers(cc, "ps-jul", k)
     print("Outliers in ps-jul: ", psjul)
+    numOutliers.append(psjul)
 
     psjun = countOutliers(cc, "ps-jun", k)
     print("Outliers in ps-jun: ", psjun)
-
+    numOutliers.append(psjun)
+    
     psmay = countOutliers(cc, "ps-may", k)
     print("Outliers in ps-may: ", psmay)
-
+    numOutliers.append(psmay)
+    
     psapr = countOutliers(cc, "ps-apr", k)
     print("Outliers in ps-apr: ", psapr)
+    numOutliers.append(psapr)"""
 
     basep = countOutliers(cc, "ba-sep", k)
     print("Outliers in ba-sep: ", basep)
+    numOutliers.append(basep)
 
     baaug = countOutliers(cc, "ba-aug", k)
     print("Outliers in ba-aug: ", baaug)
+    numOutliers.append(baaug)
 
     bajul = countOutliers(cc, "ba-jul", k)
     print("Outliers in ba-jul: ", bajul)
+    numOutliers.append(bajul)
 
     bajun = countOutliers(cc, "ba-jun", k)
     print("Outliers in ba-jun: ", bajun)
+    numOutliers.append(bajun)
 
     bamay = countOutliers(cc, "ba-may", k)
     print("Outliers in ba-may: ", bamay)
+    numOutliers.append(bamay)
 
     baapr = countOutliers(cc, "ba-apr", k)
     print("Outliers in ba-apr: ", baapr)
+    numOutliers.append(baapr)
 
     pasep = countOutliers(cc, "pa-sep", k)
     print("Outliers in pa-sep: ", pasep)
+    numOutliers.append(pasep)
 
     paaug = countOutliers(cc, "pa-aug", k)
     print("Outliers in pa-aug: ", paaug)
+    numOutliers.append(paaug)
 
     pajul = countOutliers(cc, "pa-jul", k)
     print("Outliers in pa-jul: ", pajul)
+    numOutliers.append(pajul)
 
     pajun = countOutliers(cc, "pa-jun", k)
     print("Outliers in pa-jun: ", pajun)
+    numOutliers.append(pajun)
 
     pamay = countOutliers(cc, "pa-may", k)
     print("Outliers in pa-may: ", pamay)
+    numOutliers.append(pamay)
 
     paapr = countOutliers(cc, "pa-apr", k)
     print("Outliers in pa-apr: ", paapr)
+    numOutliers.append(paapr)
 
+    plotNumOutliers(numOutliers, "/pic.pdf")
     return
 
 
@@ -170,5 +192,5 @@ print("Shape of dataset without outliers: ", dataNew.shape)
 generatePlots(newPathNoO, dataNew, 1)
 
 #Counting outliers
-#k = 1.5
-#countAll(dataFrameNoMV, k)
+k = 1.5
+countAll(dataFrameNoMV, k)

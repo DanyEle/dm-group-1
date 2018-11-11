@@ -80,6 +80,20 @@ def getAverageIncome(usdToNtd, averageAnnual):
     return averageMonthly
 
 
+"""This function creates and saves a boxplot as numOutliers.figExtension"""
+
+
+def plotNumOutliers(numbers, filePath):
+    crosstab = pd.crosstab(numbers, 'bau')
+    # Normalize the cross tab to sum to 1:
+    crosstab_normalized = crosstab.div(crosstab.sum(1).astype(float), axis=0)
+
+    crosstab_normalized.plot(
+        kind='bar', stacked=True, title='Percentage of outliers per columns')
+
+    plt.savefig(filePath)
+
+
 """This function creates and saves a boxplot as "boxName.figExtension", which has howMany different plots (whose names are in the string list called colNames) from the file whose path is filePath"""
 
 
