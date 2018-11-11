@@ -5,6 +5,10 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
+
+avgIncomeAnnualInUSD = 10311
+
+exchangeUSDToNTD = 32
 """This function takes as an input the path of the file that represents the dataset (filePath) and the string which is the name of a column (colName). This function returns the column as a list or -1, if thecolumn doesn't have numerical values"""
 
 
@@ -67,6 +71,15 @@ def highlightColumn(filePath, colName, pandas=None):
     return selectedCol
 
 
+"""This function returns the average monthly gross income in NTD, given the exchange rate in 2005 (USD -> NTD) and the average gross annual income in USD"""
+
+
+def getAverageIncome(usdToNtd, averageAnnual):
+    averageMonthly = averageAnnual / 12
+    averageMonthly = averageMonthly * usdToNtd
+    return averageMonthly
+
+
 """This function creates and saves a boxplot as "boxName.figExtension", which has howMany different plots (whose names are in the string list called colNames) from the file whose path is filePath"""
 
 
@@ -100,7 +113,8 @@ def printPlots(boxName,
         else:
             if flag:
                 if colName == "limit":
-                    myInt = 49989
+                    myInt = getAverageIncome(exchangeUSDToNTD,
+                                             avgIncomeAnnualInUSD)
                     newCol = [x / myInt for x in currCol]
                     dataToPlot.append(newCol)
                     boxName = boxName + "Salary"
