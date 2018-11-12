@@ -5,6 +5,10 @@ import matplotlib as mpl
 mpl.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
+
+avgIncomeAnnualInUSD = 10311
+
+exchangeUSDToNTD = 32
 """This function takes as an input the path of the file that represents the dataset (filePath) and the string which is the name of a column (colName). This function returns the column as a list or -1, if thecolumn doesn't have numerical values"""
 
 
@@ -67,6 +71,45 @@ def highlightColumn(filePath, colName, pandas=None):
     return selectedCol
 
 
+"""This function returns the average monthly gross income in NTD, given the exchange rate in 2005 (USD -> NTD) and the average gross annual income in USD"""
+
+
+def getAverageIncome(usdToNtd, averageAnnual):
+    averageMonthly = averageAnnual / 12
+    averageMonthly = averageMonthly * usdToNtd
+    return averageMonthly
+
+
+"""This function creates and saves a boxplot as numOutliers.figExtension"""
+
+
+def plotNumOutliers(numbers, rows, filePath):
+    normalized = [x / 100 for x in numbers]
+    plt.clf()
+    fig = plt.figure(1, figsize=(9, 6))
+    pix = fig.add_subplot(111)
+    nG = np.arange(len(rows))
+    bW = 0.8
+    barPlot = plt.bar(nG, normalized, bW, color='g', label='bau', alpha=0.8)
+    plt.xlabel('Columns')
+    plt.ylabel('Percentage')
+    plt.title('Percentage of outliers per column')
+    labels = [
+        'limit', 'age', 'ba-sep', 'ba-aug', 'ba-jul', 'ba-jun', 'ba-may',
+        'ba-apr', 'pa-sep', 'pa-aug', 'pa-jul', 'pa-jun', 'pa-may', 'pa-apr'
+    ]
+    for rect in barPlot:
+        height = rect.get_height()
+        pix.text(
+            rect.get_x() + rect.get_width() / 2.,
+            0.99 * height,
+            '%d' % int(height) + "%",
+            ha='center',
+            va='bottom')
+    plt.xticks(nG, labels, size=5)
+    plt.savefig(filePath)
+
+
 """This function creates and saves a boxplot as "boxName.figExtension", which has howMany different plots (whose names are in the string list called colNames) from the file whose path is filePath"""
 
 
@@ -100,7 +143,8 @@ def printPlots(boxName,
         else:
             if flag:
                 if colName == "limit":
-                    myInt = 49989
+                    myInt = getAverageIncome(exchangeUSDToNTD,
+                                             avgIncomeAnnualInUSD)
                     newCol = [x / myInt for x in currCol]
                     dataToPlot.append(newCol)
                     boxName = boxName + "Salary"
