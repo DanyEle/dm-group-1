@@ -83,14 +83,30 @@ def getAverageIncome(usdToNtd, averageAnnual):
 """This function creates and saves a boxplot as numOutliers.figExtension"""
 
 
-def plotNumOutliers(numbers, filePath):
-    crosstab = pd.crosstab(numbers, 'bau')
-    # Normalize the cross tab to sum to 1:
-    crosstab_normalized = crosstab.div(crosstab.sum(1).astype(float), axis=0)
-
-    crosstab_normalized.plot(
-        kind='bar', stacked=True, title='Percentage of outliers per columns')
-
+def plotNumOutliers(numbers, rows, filePath):
+    normalized = [x / 100 for x in numbers]
+    plt.clf()
+    fig = plt.figure(1, figsize=(9, 6))
+    pix = fig.add_subplot(111)
+    nG = np.arange(len(rows))
+    bW = 0.8
+    barPlot = plt.bar(nG, normalized, bW, color='g', label='bau', alpha=0.8)
+    plt.xlabel('Columns')
+    plt.ylabel('Percentage')
+    plt.title('Percentage of outliers per column')
+    labels = [
+        'limit', 'age', 'ba-sep', 'ba-aug', 'ba-jul', 'ba-jun', 'ba-may',
+        'ba-apr', 'pa-sep', 'pa-aug', 'pa-jul', 'pa-jun', 'pa-may', 'pa-apr'
+    ]
+    for rect in barPlot:
+        height = rect.get_height()
+        pix.text(
+            rect.get_x() + rect.get_width() / 2.,
+            0.99 * height,
+            '%d' % int(height) + "%",
+            ha='center',
+            va='bottom')
+    plt.xticks(nG, labels, size=5)
     plt.savefig(filePath)
 
 

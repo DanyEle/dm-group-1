@@ -68,16 +68,19 @@ def generatePlots(newpath, filePath, pandas=None, log=None):
 
 def countAll(cc, k):
     numOutliers = []
+    rows = []
     totalLength = len(cc.limit)
     print("Lines in dataset: ", totalLength)
 
     limit = countOutliers(cc, "limit", k)
     print("Outliers in limit: ", limit)
     numOutliers.append(limit)
+    rows.append(10000)
 
     age = countOutliers(cc, "age", 1)
     print("Outliers in age: ", age)
     numOutliers.append(age)
+    rows.append(10000)
     """pssep = countOutliers(cc, "ps-sep", k)
     print("Outliers in ps-sep: ", pssep)
     numOutliers.append(pssep)
@@ -105,52 +108,64 @@ def countAll(cc, k):
     basep = countOutliers(cc, "ba-sep", k)
     print("Outliers in ba-sep: ", basep)
     numOutliers.append(basep)
+    rows.append(10000)
 
     baaug = countOutliers(cc, "ba-aug", k)
     print("Outliers in ba-aug: ", baaug)
     numOutliers.append(baaug)
+    rows.append(10000)
 
     bajul = countOutliers(cc, "ba-jul", k)
     print("Outliers in ba-jul: ", bajul)
     numOutliers.append(bajul)
+    rows.append(10000)
 
     bajun = countOutliers(cc, "ba-jun", k)
     print("Outliers in ba-jun: ", bajun)
     numOutliers.append(bajun)
+    rows.append(10000)
 
     bamay = countOutliers(cc, "ba-may", k)
     print("Outliers in ba-may: ", bamay)
     numOutliers.append(bamay)
+    rows.append(10000)
 
     baapr = countOutliers(cc, "ba-apr", k)
     print("Outliers in ba-apr: ", baapr)
     numOutliers.append(baapr)
+    rows.append(10000)
 
     pasep = countOutliers(cc, "pa-sep", k)
     print("Outliers in pa-sep: ", pasep)
     numOutliers.append(pasep)
+    rows.append(10000)
 
     paaug = countOutliers(cc, "pa-aug", k)
     print("Outliers in pa-aug: ", paaug)
     numOutliers.append(paaug)
+    rows.append(10000)
 
     pajul = countOutliers(cc, "pa-jul", k)
     print("Outliers in pa-jul: ", pajul)
     numOutliers.append(pajul)
+    rows.append(10000)
 
     pajun = countOutliers(cc, "pa-jun", k)
     print("Outliers in pa-jun: ", pajun)
     numOutliers.append(pajun)
+    rows.append(10000)
 
     pamay = countOutliers(cc, "pa-may", k)
     print("Outliers in pa-may: ", pamay)
     numOutliers.append(pamay)
+    rows.append(10000)
 
     paapr = countOutliers(cc, "pa-apr", k)
     print("Outliers in pa-apr: ", paapr)
     numOutliers.append(paapr)
+    rows.append(10000)
 
-    plotNumOutliers(numOutliers, "/pic.pdf")
+    plotNumOutliers(numOutliers, rows, "pic.pdf")
     return
 
 
