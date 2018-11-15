@@ -4,14 +4,15 @@ import matplotlib.pyplot as plt
 
 
 
+    
+
 
 def main():
     #load dataset into a dataframe
     credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
-    
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
-        
+    
     column_names = credit_cards.columns
     #ba = balance[Continuous]
     columns_ba = ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"]
@@ -19,7 +20,6 @@ def main():
     columns_pa = ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
     #ps = -x on time, x months in advance after which the credit was reimbursed [DISCRETE VALUE!] 
     columns_ps = ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"]
-    
     #firstly, create a data frame where we have three extra columns: ba, pa, ps
     #such attributes are the average values of the corresponding 6 attributes in the original data frame
     credit_cards_avg = create_data_frame_avg(credit_cards, columns_ba, columns_pa, columns_ps)
@@ -44,8 +44,6 @@ def main():
     
     compute_correlation_between_attributes(credit_cards_avg, columns_ps)
     
-
-    
     #the only significant correlation (0.37) appears to be between limit and pa, and limit and ba (0.31)
     
     size = 12
@@ -59,13 +57,13 @@ def main():
     
     plot_average_ba_pa_all_months(size, credit_cards, columns_ba, columns_pa, columns_ps)     
     
-    plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue", "purple", "red", "orange"), size, "education")    
+    plot_attribute_group_ba_pa(credit_cards_avg, columns_ba, columns_pa, ("blue", "purple", "red", "orange"), size, "education")    
     
-    plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue", "red"), size, "credit_default")    
+    plot_attribute_group_ba_pa(credit_cards_avg, columns_ba, columns_pa, ("blue", "red"), size, "credit_default")    
 
-    plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue"), size, "age") 
+    plot_attribute_group_ba_pa(credit_cards_avg, columns_ba, columns_pa, ("blue"), size, "age") 
     
-    plot_attribute_group_ba_pa(credit_cards, columns_ba, columns_pa, ("blue", "purple", "red" ), size, "status")    
+    plot_attribute_group_ba_pa(credit_cards_avg, columns_ba, columns_pa, ("blue", "purple", "red" ), size, "status")    
        
     #now try to make a scatter plot between the expenses and the balance
     #scatter_plot_attribute_columns(credit_cards_avg["pa"], credit_cards_avg["ba"], True)
@@ -106,29 +104,52 @@ def main():
     
     plot_crosstab_credit_default_ps(credit_cards_avg, size, "age")
 
-    
     plot_crosstab_credit_default_ps(credit_cards_avg, size, "status")
     
+    plot_crosstab_credit_default_ps(credit_cards_avg, size, "limit")
+
     
     plot_group_histogram_attribute(credit_cards_avg, 'age', size, 1)
     
+    plot_group_histogram_attribute(credit_cards_avg, 'pa', size, 500)
+    
+    
+    plot_distribution(credit_cards_avg, "education", "age", 5)
+    
+    
+    plot_distribution(credit_cards_avg, "status", "age", 5)
+
+    plot_distribution(credit_cards_avg, "credit_default", "age", 5)
+    
+    plot_distribution(credit_cards_avg, "credit_default", "pa", 5)
+    
+    plot_distribution(credit_cards_avg, "credit_default", "ba", 5)
+    
+    plot_distribution(credit_cards_avg, "credit_default", "ps", 5)
+    
+    plot_distribution(credit_cards_avg, "credit_default", "limit", 5)
+    
+    credit_cards_avg = create_pa_ba_difference_column(credit_cards_avg)
+    
+    plot_distribution(credit_cards_avg, "credit_default", "ba-pa", 5)
+
     
 def plot_group_histogram_attribute(credit_cards_avg, attribute, size, bin_size):
-    
+        
     df = credit_cards_avg
     
     # Set up a grid of plots
     fig, axes = plt.subplots(2, 1, figsize=(10,10))
     
     # Histogram of AgeFill segmented by Survived
-    df1 = df[df['credit_default'] == 'no'][attribute]
-    df2 = df[df['credit_default'] == 'yes'][attribute]
-    max_age = max(df['age'])
+    df1 = df[df['credit_default'] == 'yes'][attribute]
+    df2 = df[df['credit_default'] == 'no'][attribute]
+    max_age = max(df[attribute])
     axes[0].hist([df1, df2], 
                  bins=int(max_age / bin_size), # bin_size
                  range=(1, max_age), 
                  stacked=True)
-    axes[0].legend(('Repaid', 'Default'), loc='best')
+    axes[0].legend(('Default ', 'No Default'), loc='best')
     axes[0].set_title('Defaults by Age Groups Histogram')
     axes[0].set_xlabel('Age')
     axes[0].set_ylabel('Count')
@@ -138,7 +159,8 @@ def plot_group_histogram_attribute(credit_cards_avg, attribute, size, bin_size):
     axes[1].set_title('Credit Default by Age Plot')
     axes[1].set_xlabel('Defaults')
     axes[1].set_ylabel('Age')
-        
+    
+    fig.savefig("/home/daniele/dm-local/credit_default_" + attribute + ".pdf")
     
     
 def plot_crosstab_credit_default_ps(credit_cards_avg, size, attribute):
@@ -483,7 +505,6 @@ def compute_mean_std_for_columns(list_columns, data_frame):
     
     
 #Riccardo's function
-    
 
 def remove_missing_values(df_in):
     df_out = df_in
@@ -507,7 +528,53 @@ def remove_missing_values(df_in):
 
 
 
+def plot_distribution(credit_cards, categorical_attribute, numerical_attribute, size):
+    figurePrint = plt.figure(figsize=(size, size)) 
 
+    df = credit_cards
+    df['attrFill'] = df[numerical_attribute]
+    
+    attribute_types = sorted(df[categorical_attribute].unique())
+    for education_type in attribute_types:
+        df.attrFill[df[categorical_attribute] == education_type].plot(kind='kde')
+        
+    plt.xlabel(numerical_attribute)
+    plt.legend(attribute_types, loc='best')
+    plt.show()
+    figurePrint.savefig("/home/daniele/dm-local/distribution_" + numerical_attribute + "_" + categorical_attribute + ".pdf", bbox_inches='tight')
+    
+
+
+#according to configuration 1:
+#Ba(m), Pa(m+1)
+def create_pa_ba_difference_column(credit_cards_avg):
+    #we create a column for 
+    #we wanna get how much the user had paid 
+    
+    #ex: we have a ba-apr of 30000 in ba-apr
+    
+    #ba-pay-may contains the rmeaining amount to pay for the month of april
+    #remaining amount to pay = ba_apr - pa_may
+    
+    credit_cards_avg['ba-pa-apr'] = credit_cards_avg["pa-may"] - credit_cards_avg["ba-apr"] 
+    credit_cards_avg['ba-pa-may'] = credit_cards_avg["pa-jun"] - credit_cards_avg["ba-may"]
+    credit_cards_avg['ba-pa-jun'] = credit_cards_avg["pa-jul"] - credit_cards_avg["ba-jun"]
+    credit_cards_avg['ba-pa-jul'] =  credit_cards_avg["pa-aug"] - credit_cards_avg["ba-jul"]
+    credit_cards_avg['ba-pa-aug'] = credit_cards_avg["pa-sep"] - credit_cards_avg["ba-aug"]
+    #now let's compute the average among these columns
+    credit_cards_avg["ba-pa"] = credit_cards_avg['ba-pa-apr'] +  credit_cards_avg['ba-pa-may'] + credit_cards_avg["ba-pa-jun"] + credit_cards_avg["ba-pa-jul"] + credit_cards_avg["ba-pa-aug"]
+    
+    credit_cards_avg["ba-pa"] /= 5
+    
+    return credit_cards_avg
+
+    
+    
+    
+    
+    
+    
+    
 
 
 
