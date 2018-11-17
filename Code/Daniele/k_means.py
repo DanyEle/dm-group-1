@@ -5,11 +5,9 @@ import warnings
 
 
 #imports for k-means
-from sklearn.metrics import *
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.cluster import KMeans
-from sklearn.cluster import DBSCAN
-from sklearn.cluster import AgglomerativeClustering
-from sklearn.neighbors import kneighbors_graph
+from sklearn.metrics import silhouette_score
 
 
 
@@ -32,22 +30,42 @@ def main():
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
         
     attributes_k_means = ['limit', 'education', 'age', 'ba', 'ps', 'pa-apr', 'pa-may', 'pa-jun', 'pa-jul', 'pa-aug', 'pa-sep']
-    credit_cards_k_means = credit_cards_avg[attributes_k_means]
-    
-    #let's actually run k-means, shall we?
-    
-    warnings.filterwarnings('ignore')
-
   
-    compute_k_means_given_data_frame(credit_cards_avg)
+    #let's actually run k-means, shall we?  
+    compute_k_means_given_data_frame(credit_cards_edu_numerical, 50, attributes_k_means)
         
     
     
-def compute_k_means_given_data_frame(df_train):
-    min_max_scaler = preprocessing.MinMaxScaler()
-
-    for k in credit_cards_avg.columns:
-        credit_cards_avg[k] = min_max_scaler.fit_transform(df_train[k].values.astype(float))
+def compute_k_means_given_data_frame(df, max_k, attributes):
+    credit_cards_k_means = df[attributes]
+    
+    #first step: normalize the data applying a min-max scaling
+    #such that it will be in the range 0-1
+    scaler = MinMaxScaler()
+    #X is the training data transformed
+    X = scaler.fit_transform(df.values)
+   
+        #let's compute the SSE for all the clusters with k =2..50
+    sse_list = list()
+    for k in range(2, max_k + 1):
+        kmeans = KMeans(n_clusters=k, n_init=10, max_iter=100)
+        kmeans.fit(X)
+        
+        sse = kmeans.inertia_
+        sse_list.append(sse)
+        
+    
+    #and now let's plot the results we got based on the knee method
+    plt.plot(range(2, len(sse_list) + 2), sse_list)
+    plt.ylabel('SSE', fontsize=22)
+    plt.xlabel('K', fontsize=22)
+    plt.tick_params(axis='both', which='major', labelsize=22)
+    plt.show()
+    
+    
+    
+        
+   
     
 
 def convert_education_to_numerical_attribute(credit_cards_input):    
