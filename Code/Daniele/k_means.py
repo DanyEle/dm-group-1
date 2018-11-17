@@ -36,15 +36,14 @@ def main():
         
     
     
-def compute_k_means_given_data_frame(df, max_k, attributes):
-    credit_cards_k_means = df[attributes]
+def k_means_knee_method_means_given_data_frame(df, max_k, attributes):
+    df = df[attributes]
     
     #first step: normalize the data applying a min-max scaling
     #such that it will be in the range 0-1
     scaler = MinMaxScaler()
     #X is the training data transformed
     X = scaler.fit_transform(df.values)
-   
         #let's compute the SSE for all the clusters with k =2..50
     sse_list = list()
     for k in range(2, max_k + 1):
@@ -62,7 +61,47 @@ def compute_k_means_given_data_frame(df, max_k, attributes):
     plt.tick_params(axis='both', which='major', labelsize=22)
     plt.show()
     
+def k_means_given_data_frame_k(df, k, attributes):
+    df = df[attributes]
+
+    #just run k-means once with the k passed. 
+    scaler = MinMaxScaler()
+    #X is the training data transformed
+    X = scaler.fit_transform(df.values)
     
+    kmeans = KMeans(n_clusters=k, n_init=10, max_iter=100)
+    kmeans.fit(X)
+    
+    #let's see the labels obtained
+    np.unique(kmeans.labels_, return_counts=True)
+    
+    hist, bins = np.histogram(kmeans.labels_, 
+                          bins=range(0, len(set(kmeans.labels_)) + 1))
+    dict(zip(bins, hist))
+    
+    #we can visualize our clustering wrt. two attributes
+    centers = scaler.inverse_transform(kmeans.cluster_centers_)
+
+    
+    plt.scatter(df['limit'], df['age'], c=kmeans.labels_, 
+            s=20)
+    plt.scatter(centers[:, 0], centers[:, 3], s=200, marker='*', c='k')
+    plt.tick_params(axis='both', which='major', labelsize=22)
+    plt.show()
+    
+    
+    #visualize clusters by parallel coordinates
+    plt.figure(figsize=(8, 4))
+    for i in range(0, len(centers)):
+        plt.plot(centers[i], marker='o', label='Cluster %s' % i)
+    plt.tick_params(axis='both', which='major', labelsize=22)
+    plt.xticks(range(0, len(df.columns)), df.columns, fontsize=18)
+    plt.legend(fontsize=20)
+    plt.show()
+    
+    print('SSE %s' % kmeans.inertia_)
+    print('Silhouette %s' % silhouette_score(X, kmeans.labels_))
+        
     
         
    
