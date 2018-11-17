@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 
 def main():
     #load dataset into a dataframe
-    credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
+    credit_cards = pd.read_csv("D:\dm-group-1\Dataset\credit_default_train.csv")
+
+   # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
     
@@ -30,7 +32,7 @@ def main():
     #sys.stdout = filename
     
     #get some basic statistics about the attributes
-    print(credit_cards.describe())
+    print(credit_cards_avg.describe())
     
     #remember that correlation doesn't make sense on class attributes!
     
@@ -132,6 +134,18 @@ def main():
     credit_cards_avg = create_pa_ba_difference_column(credit_cards_avg)
     
     plot_distribution(credit_cards_avg, "credit_default", "ba-pa", 5)
+    
+
+    #Show the correlation matrix down here
+    credit_cards_education = convert_education_to_numerical_attribute(credit_cards_avg)
+    
+    pd.set_option('display.max_columns', None)  
+    pd.set_option('display.width', 2000)
+    
+    credit_cards_education.drop(['ba', 'pa', 'ps'], axis=1, inplace=True)
+
+
+    credit_cards_education.corr()
 
     
 def plot_group_histogram_attribute(credit_cards_avg, attribute, size, bin_size):

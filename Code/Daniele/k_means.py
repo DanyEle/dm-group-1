@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import warnings
+
 
 #imports for k-means
 from sklearn.metrics import *
@@ -14,7 +16,9 @@ from sklearn.neighbors import kneighbors_graph
 
 def main():
     #load dataset into a dataframe
-    credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
+    credit_cards = pd.read_csv("D:\dm-group-1\Dataset\credit_default_train.csv")
+
+   # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
         
@@ -26,13 +30,24 @@ def main():
     
     #convert education into numerical, as it is an ordinal attribute
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
-    
-    attributes_k_means = ['limit', 'education', 'status', 'age', 'ps', 'pa']
+        
+    attributes_k_means = ['limit', 'education', 'age', 'ba', 'ps', 'pa-apr', 'pa-may', 'pa-jun', 'pa-jul', 'pa-aug', 'pa-sep']
     credit_cards_k_means = credit_cards_avg[attributes_k_means]
     
+    #let's actually run k-means, shall we?
+    
+    warnings.filterwarnings('ignore')
+
+  
+    compute_k_means_given_data_frame(credit_cards_avg)
+        
     
     
-    
+def compute_k_means_given_data_frame(df_train):
+    min_max_scaler = preprocessing.MinMaxScaler()
+
+    for k in credit_cards_avg.columns:
+        credit_cards_avg[k] = min_max_scaler.fit_transform(df_train[k].values.astype(float))
     
 
 def convert_education_to_numerical_attribute(credit_cards_input):    
