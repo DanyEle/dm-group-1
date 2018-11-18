@@ -29,10 +29,20 @@ def main():
     #convert education into numerical, as it is an ordinal attribute
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
         
-    attributes_k_means = ['limit', 'education', 'age', 'ba', 'ps', 'pa-apr', 'pa-may', 'pa-jun', 'pa-jul', 'pa-aug', 'pa-sep']
-  
-    #let's actually run k-means, shall we?  
-    compute_k_means_given_data_frame(credit_cards_edu_numerical, 50, attributes_k_means)
+    
+    ###ITERATION 1
+    attributes_k_means_iter_1 = ['limit', 'education', 'age', 'ba', 'ps', 'pa-apr', 'pa-may', 'pa-jun', 'pa-jul', 'pa-aug', 'pa-sep']
+
+    k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_1)
+    
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_k_means_iter_1, False)
+    
+    attributes_k_means_iter_2 = ['limit', 'education', 'age', 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep']
+    
+    k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_2)
+    
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_k_means_iter_2, False)
+    
         
     
     
@@ -60,8 +70,9 @@ def k_means_knee_method_means_given_data_frame(df, max_k, attributes):
     plt.xlabel('K', fontsize=22)
     plt.tick_params(axis='both', which='major', labelsize=22)
     plt.show()
+    plt.savefig("D:\dm-group-1\Code\Daniele\k_means_knee.pdf")
     
-def k_means_given_data_frame_k(df, k, attributes):
+def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     df = df[attributes]
 
     #just run k-means once with the k passed. 
@@ -79,15 +90,18 @@ def k_means_given_data_frame_k(df, k, attributes):
                           bins=range(0, len(set(kmeans.labels_)) + 1))
     dict(zip(bins, hist))
     
-    #we can visualize our clustering wrt. two attributes
-    centers = scaler.inverse_transform(kmeans.cluster_centers_)
-
     
-    plt.scatter(df['limit'], df['age'], c=kmeans.labels_, 
-            s=20)
-    plt.scatter(centers[:, 0], centers[:, 3], s=200, marker='*', c='k')
-    plt.tick_params(axis='both', which='major', labelsize=22)
-    plt.show()
+    if(inverse_transform):
+        centers = scaler.inverse_transform(kmeans.cluster_centers_)
+    else:
+        centers = kmeans.cluster_centers_
+    
+
+    #plt.scatter(df['education'], df['age'], c=kmeans.labels_, 
+           # s=20)
+    #plt.scatter(centers[:, 0], centers[:, 3], s=200, marker='*', c='k')
+    #plt.tick_params(axis='both', which='major', labelsize=22)
+    #plt.show()
     
     
     #visualize clusters by parallel coordinates
@@ -95,8 +109,8 @@ def k_means_given_data_frame_k(df, k, attributes):
     for i in range(0, len(centers)):
         plt.plot(centers[i], marker='o', label='Cluster %s' % i)
     plt.tick_params(axis='both', which='major', labelsize=22)
-    plt.xticks(range(0, len(df.columns)), df.columns, fontsize=18)
-    plt.legend(fontsize=20)
+    plt.xticks(range(0, len(df.columns)), df.columns, fontsize=18, rotation=90)
+    plt.legend(fontsize=5)
     plt.show()
     
     print('SSE %s' % kmeans.inertia_)
