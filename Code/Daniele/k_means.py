@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import warnings
 
 
 #imports for k-means
@@ -20,7 +19,7 @@ def main():
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
     
-    credit_cards = correct_ps_values(credit_cards)
+    #credit_cards = correct_ps_values(credit_cards)
         
     #firstly, create a data frame where we have three extra columns: ba, pa, ps
     #such attributes are the average values of the corresponding 6 attributes in the original data frame
@@ -96,6 +95,9 @@ def k_means_knee_method_means_given_data_frame(df, max_k, attributes):
     plt.show()
     plt.savefig("D:\dm-group-1\Code\Daniele\k_means_knee.pdf")
     
+    
+    
+    
 def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     credit_cards = df
     df = df[attributes]
@@ -124,7 +126,6 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     #plt.tick_params(axis='both', which='major', labelsize=22)
     #plt.show()
     
-    
     #visualize clusters by parallel coordinates
     plt.figure(figsize=(8, 4))
     for i in range(0, len(centers)):
@@ -138,9 +139,10 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     print('Silhouette %s' % silhouette_score(X, kmeans.labels_))
     
     #amount of elements per cluster
+    print("Amount of elements per cluster:")
     print(dict(zip(bins, hist)))
     #centroid attributes' values per cluster
-    print(centers)
+    #print(centers)    
     
     credit_cards['Label'] = kmeans.labels_
     pd.crosstab(credit_cards['credit_default'], credit_cards['Label'])
@@ -151,7 +153,34 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     
     pd.crosstab(credit_cards['credit_default'],  kmeans.labels_)
     
+    show_center_values_per_cluster_attributes(centers, attributes, credit_cards)
+    
+    
+    
 
+def show_center_values_per_cluster_attributes(centers, attributes, credit_cards):
+    #loop through every single cluster
+    centers = scaler.inverse_transform(centers)
+    #i is the index of centers
+    for i in range(1, len(centers)):
+        print("Cluster " + str(i) + ":")
+        print("Amount of elements in cluster " + str(i) + " is " + str(len(credit_cards[credit_cards["Label"] == i ]))  ) 
+        amount_defaults_in_cluster = len(credit_cards.loc[(credit_cards["credit_default"] == "yes") & (credit_cards["Label"] == i)])
+        amount_default_not_in_cluster = len(credit_cards.loc[(credit_cards["credit_default"] == "no") & (credit_cards["Label"] == i)])
+        
+        print("Ratio of default in cluster i (defaults/non-defaults) " + str((amount_defaults_in_cluster / amount_default_not_in_cluster)))
+        print("-------------------------")
+        #and loop through every single attribute of the cluster's center
+        for j in range(1, len(centers[i])):
+            print(attributes[j])
+            print(centers[i][j])
+        print("-------------------------")
+    
+        
+    
+        
+        
+    
     
         
    
