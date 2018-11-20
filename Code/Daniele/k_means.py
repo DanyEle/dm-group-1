@@ -14,34 +14,58 @@ from sklearn.metrics import silhouette_score
 
 def main():
     #load dataset into a dataframe
-    credit_cards = pd.read_csv("D:\dm-group-1\Dataset\credit_default_train.csv")
+    credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
 
    # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
+    
+    credit_cards = correct_ps_values(credit_cards)
         
     #firstly, create a data frame where we have three extra columns: ba, pa, ps
     #such attributes are the average values of the corresponding 6 attributes in the original data frame
     credit_cards_avg = create_data_frame_avg(credit_cards, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
     
-    #we now need to convert categorical attributes into numerical attributes
-    
     #convert education into numerical, as it is an ordinal attribute
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
         
-    
     ###ITERATION 1
     attributes_k_means_iter_1 = ['limit', 'education', 'age', 'ba', 'ps', 'pa-apr', 'pa-may', 'pa-jun', 'pa-jul', 'pa-aug', 'pa-sep']
 
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_1)
     
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_k_means_iter_1, False)
+    k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_1)
     
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_1, False)
+    
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_1, False)
+
+    ###ITERATION 2
+
     attributes_k_means_iter_2 = ['limit', 'education', 'age', 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep']
     
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_2)
     
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_k_means_iter_2, False)
+    k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_2)
+
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_2, False)
+    
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_2, False)
+    
+    #ITERATION 3
+    attributes_k_means_iter_3 = ['limit', 'education', 'age', 'ps-sep', 'ba-sep']
+    
+    k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_3)
+    
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_3, False)
+    
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_3, False)
+
+    
+
+    
+
+
     
         
     
@@ -73,8 +97,8 @@ def k_means_knee_method_means_given_data_frame(df, max_k, attributes):
     plt.savefig("D:\dm-group-1\Code\Daniele\k_means_knee.pdf")
     
 def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
+    credit_cards = df
     df = df[attributes]
-
     #just run k-means once with the k passed. 
     scaler = MinMaxScaler()
     #X is the training data transformed
@@ -88,14 +112,11 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     
     hist, bins = np.histogram(kmeans.labels_, 
                           bins=range(0, len(set(kmeans.labels_)) + 1))
-    dict(zip(bins, hist))
-    
     
     if(inverse_transform):
         centers = scaler.inverse_transform(kmeans.cluster_centers_)
     else:
         centers = kmeans.cluster_centers_
-    
 
     #plt.scatter(df['education'], df['age'], c=kmeans.labels_, 
            # s=20)
@@ -115,7 +136,22 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     
     print('SSE %s' % kmeans.inertia_)
     print('Silhouette %s' % silhouette_score(X, kmeans.labels_))
-        
+    
+    #amount of elements per cluster
+    print(dict(zip(bins, hist)))
+    #centroid attributes' values per cluster
+    print(centers)
+    
+    credit_cards['Label'] = kmeans.labels_
+    pd.crosstab(credit_cards['credit_default'], credit_cards['Label'])
+    crosstab = pd.crosstab( kmeans.labels_, credit_cards['credit_default'])
+    crosstab_normalized = crosstab.div(crosstab.sum(1).astype(float), axis=0)
+    crosstab_normalized.plot(kind='bar', stacked=True, 
+                   title='Default by ' + str('credit_default') + ' class')
+    
+    pd.crosstab(credit_cards['credit_default'],  kmeans.labels_)
+    
+
     
         
    
@@ -141,9 +177,34 @@ def educ_category_to_number(category):
     elif category == "graduate school":
         return 3
         
-
-
-
-
+def correct_ps_values(data):
+    #Correzione FORMULA 1
+    #Sistemo valori -1
+    for i in range(0, len(data)):
+        for j in range(12, 17):
+            ba=data.iat[i, j]
+            if(ba>0):
+                pa=data.iat[i, j+5]
+                if((ba-pa)<=0):
+                    ps=data.iat[i, j-6]
+                    if(ps!=-1):
+                        data.iloc[i,j-6]=-1
+                        
+        
+    #Correzione FORMULA 2
+    #sistemo valori -2
+    for i in range(0, len(data)):
+        for j in range(11,16):
+            ba=data.iat[i,j]
+            precBa=data.iat[i,j+1]
+            pa=data.iat[i,j+6]
+            ps=data.iat[i,j-6]
+            if(ba<=0):
+                if(ba==(precBa-pa)):
+                    if(ps!=-2):
+                        data.iloc[i,j-6]=-2
+                        
+                        
+    return(data)
 
 
