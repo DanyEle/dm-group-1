@@ -4,7 +4,7 @@ def correct_ps_values(data):
     #Correzione FORMULA 1
     #Sistemo valori -1
     for i in range(0, len(data)):
-        for j in range(12, 17):correct_ps_values
+        for j in range(12, 17):
             ba=data.iat[i, j]
             if(ba>0):
                 pa=data.iat[i, j+5]
