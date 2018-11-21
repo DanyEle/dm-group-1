@@ -63,7 +63,7 @@ def kmeans_(df, mink, maxk, numberOfColumns):
 
 	#we serialize the dictionary 
     import pickle
-    pickle.dump(d, open('kmeans_columns_' + numberOfColumns + '.p', 'wb'))
+    pickle.dump(d, open('kmeans_columns_' + str(numberOfColumns) + '.p', 'wb'))
 	
 	#if we want reload the dictionary, the instruction is the following:
 	#result=pickle.load(open('kmeansProva.P', 'rb'))
