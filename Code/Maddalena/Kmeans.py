@@ -53,3 +53,31 @@ def kmeans_(df, mink, maxk, numberOfColumns):
 	#if we want reload the dictionary, the instruction is the following:
 	#result=pickle.load(open('kmeansProva.P', 'rb'))
     return d
+	
+def print_results(df, kmeans_, mink):
+	for c in kmeans_:
+		print(c)
+		sil=kmeans_[c]['Sil']
+		lab=kmeans_[c]['Labels']
+		pos=sil.index(max(sil))
+		print(pos+mink)
+		print(max(sil))
+		hist, bins = np.histogram(lab[pos], bins=range(0, len(set(lab[pos])) + 1))
+		d=dict(zip(bins, hist))
+		print(d)
+
+		x=c.split(",")[0]
+		y=c.split(",")[1]
+		z=c.split(",")[2]
+
+		data=df[[x,y,z]]
+		scaler.fit_transform(data.values)
+
+		centers = scaler.inverse_transform(kmeans_[c]['Centers'][pos])
+		plt.figure(figsize=(10, 6))
+		for i in range(0, len(centers)):
+			plt.plot(centers[i], marker='o', label='Cluster %s' % i)
+		plt.tick_params(axis='both', which='major', labelsize=22)
+		plt.xticks(range(0,len(centers)), c.split(","), fontsize=18)
+		plt.legend(fontsize=20)
+		plt.show()
