@@ -1,3 +1,15 @@
+from itertools import combinations
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+#imports for k-means
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
 #Parameters
 #df: dataFrame
 #mink: min value of k for k-means 
@@ -13,6 +25,9 @@ def kmeans_(df, mink, maxk, numberOfColumns):
     labels=list()
     centers=list()
     
+    scaler = MinMaxScaler()
+
+    
 	#for each combination
     for c in comb:
         print(c)
@@ -27,7 +42,7 @@ def kmeans_(df, mink, maxk, numberOfColumns):
 		#run kmeans with different value of k
         for k in range(mink,maxk):
             kmeans = KMeans(init='k-means++', n_clusters=k, n_init=10, max_iter=100)
-            kmeans.fit(X
+            kmeans.fit(X)
 			#for each k, we store sse,labels,centers, silhouette
             sse.append(kmeans.inertia_)
             labels.append(kmeans.labels_)
@@ -41,14 +56,14 @@ def kmeans_(df, mink, maxk, numberOfColumns):
                'Centers':centers})
 			   
 		#if you want see the best value of silhouette obtained from a combination c, the instruction are the following:
-		#print(max(sil)) 
-		#print(sil.index(max(sil))+mink)
+    print(max(sil)) 
+    print(sil.index(max(sil))+mink)
 	
 	#at the end we have a dictionary where the keys are the combinations and for each combinations we have all the informations 
 
 	#we serialize the dictionary 
     import pickle
-    pickle.dump(d, open('kmeansProva.p', 'wb'))
+    pickle.dump(d, open('kmeans_columns_' + numberOfColumns + '.p', 'wb'))
 	
 	#if we want reload the dictionary, the instruction is the following:
 	#result=pickle.load(open('kmeansProva.P', 'rb'))
