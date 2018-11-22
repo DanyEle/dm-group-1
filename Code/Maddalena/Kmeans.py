@@ -3,6 +3,8 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import pickle
+
 
 
 #imports for k-means
@@ -64,6 +66,12 @@ def kmeans_(df, mink, maxk, numberOfColumns):
     
     #if we want reload the dictionary, the instruction is the following:
     #result=pickle.load(open('kmeansProva.P', 'rb'))
+	#we serialize the dictionary 
+    #pickle.dump(d, open('kmeans_columns_' + str(numberOfColumns) + '.p', 'wb'))
+    
+	
+	#if we want reload the dictionary, the instruction is the following:
+	#result=pickle.load(open('kmeansProva.P', 'rb'))
     return d
     
 def print_results(df, kmeans_, mink):
