@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
 
 
 #imports for k-means
@@ -11,16 +12,14 @@ from sklearn.metrics import silhouette_score
 
 
 
-def main():
+def run_daniele_k_means_certain_attributes():
     #load dataset into a dataframe
     credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
 
    # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
-    
     #credit_cards = correct_ps_values(credit_cards)
-        
     #firstly, create a data frame where we have three extra columns: ba, pa, ps
     #such attributes are the average values of the corresponding 6 attributes in the original data frame
     credit_cards_avg = create_data_frame_avg(credit_cards, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
@@ -59,12 +58,35 @@ def main():
     k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_3, False)
     
     k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_3, False)
+    
+    
+    
+    
+def run_maddalena_k_means_experiment():
+     #load dataset into a dataframe
+    credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
+    credit_cards = remove_missing_values(credit_cards)
+    credit_cards_avg = create_data_frame_avg(credit_cards, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
+    credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
+    credit_cards_k_means = credit_cards_edu_numerical
+    credit_cards_k_means = credit_cards_k_means[['limit', 'education', 'age', 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep']]
+    
+    #credit_cards_k_means = credit_cards_k_means.drop(columns=["sex", "credit_default", "status"])
+    
+    minK = 2
+    maxK = 10
+    
+    
+    sys.stdout = open("experiments_minK_" + str(minK) + "_maxK_" + str(maxK) + "_attributes_" + str(len(credit_cards_k_means.columns)) + ".txt", "w")
+    for i in range(2, len(credit_cards_k_means.columns)):
+        print("Amount of columns: " + str(i))
+        results_i = kmeans_(credit_cards_k_means, minK, maxK, i)
+        print_results(credit_cards_k_means, results_i, minK)
 
     
-
-    
-
-
+    #result = pickle.load(open("kmeans_columns_3.p", "rb"))
+    #kmeans_(credit_cards_k_means[["pa", "ba", "ps"]], 2, 4, 3)
+    #print_results(credit_cards_k_means[["pa", "ba", "ps"]], result, 2)
     
         
     
@@ -153,12 +175,10 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     
     pd.crosstab(credit_cards['credit_default'],  kmeans.labels_)
     
-    show_center_values_per_cluster_attributes(centers, attributes, credit_cards)
+    show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler)
+        
     
-    
-    
-
-def show_center_values_per_cluster_attributes(centers, attributes, credit_cards):
+def show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler):
     #loop through every single cluster
     centers = scaler.inverse_transform(centers)
     #i is the index of centers
@@ -175,15 +195,6 @@ def show_center_values_per_cluster_attributes(centers, attributes, credit_cards)
             print(attributes[j])
             print(centers[i][j])
         print("-------------------------")
-    
-        
-    
-        
-        
-    
-    
-        
-   
     
 
 def convert_education_to_numerical_attribute(credit_cards_input):    
