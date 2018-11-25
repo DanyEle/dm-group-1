@@ -71,18 +71,61 @@ def run_daniele_k_means_certain_attributes():
 
 
     ###ITERATION 3:
-    #let's test some attributes and comparethem with the results obtained in iteration 2
+    #let's test some attributes and compare them with the results obtained in iteration 2
     #2 attributes
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, ["ps-may", "ps-jun"], False)  
-    #3 attributes
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, ["ps-jul", "ps-aug", "ps-sep"], False)  
-    #4 attributes
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, ["ps-jul", "ps-aug", "ps-sep"], False)  
+    attributes_2 = ["ps-may", "ps-jun"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_2, False)  
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_2, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
 
-    #7 attributes
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, ["age","ps-apr","ps-may","ps-jun","ps-jul","ps-aug","ps-sep"], False)  
 
     
+    #3 attributes
+    attributes_3 = ["ps-jul", "ps-aug", "ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_3, False)  
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_3, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+    #4 attributes
+    attributes_4 = ["ps-jul", "ps-aug", "ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_4, False)  
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_4, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+    #5 attributes
+    attributes_5 = ["ps-apr","ps-may","ps-jun","ps-jul","ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_5, False) 
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_5, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+    #6 attributes    
+    attributes_6 = ["ps-apr","ps-may","ps-jun","ps-jul","ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 9, attributes_6, False) 
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_6, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+    
+    #7 attributes
+    attributes_7 = ["age","ps-apr","ps-may","ps-jun","ps-jul","ps-aug","ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_7, False)  
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_7, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+    
+    #8 attributes
+    attributes_8 = ["age","limit", "ps-apr","ps-may","ps-jun","ps-jul","ps-aug","ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_8, False)  
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_8, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+    
+    #9 attributes    
+    attributes_9 = ["age","limit", "ps-apr","ps-may","ps-jun","ps-jul","ps-aug","ps-sep"]
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_9, False)  
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_9, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
+    
+
 
 
     
@@ -173,18 +216,16 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     
 def k_means_view_centroids(centers, kmeans, X, credit_cards, attributes, scaler):
     
+    credit_cards = credit_cards[attributes]
     #visualize clusters by parallel coordinates
     plt.figure(figsize=(8, 4))
     for i in range(0, len(centers)):
         plt.plot(centers[i], marker='o', label='Cluster %s' % i)
     plt.tick_params(axis='both', which='major', labelsize=22)
-    plt.xticks(range(0, len(credit_cards[attributes].columns)), credit_cards[attributes].columns, fontsize=18, rotation=90)
+    plt.xticks(range(0, len(credit_cards.columns)), credit_cards.columns, fontsize=18, rotation=90)
     plt.legend(fontsize=5)
     plt.show()
-    
-    
-    show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler, kmeans)
-
+    #show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler, kmeans)
     
     print('SSE %s' % kmeans.inertia_)
     print('Silhouette %s' % silhouette_score(X, kmeans.labels_))
@@ -199,22 +240,19 @@ def k_means_view_centroids(centers, kmeans, X, credit_cards, attributes, scaler)
     
     
 def k_means_view_distribution(credit_cards, kmeans):
-    
     plot_crosstab_given_attribute(credit_cards, "credit_default",  kmeans.labels_)
     plot_crosstab_given_attribute(credit_cards, "sex", kmeans.labels_)
     plot_crosstab_given_attribute(credit_cards, "status", kmeans.labels_)
-    plot_crosstab_given_attribute(credit_cards, "education", kmeans.labels_)
     
     #scatter plots
     plt.scatter(credit_cards['age'], credit_cards['ps'], c=kmeans.labels_, s=20)
     plt.scatter(credit_cards['limit'], credit_cards['ps'], c=kmeans.labels_, s=20)
     
+    plot_histogram(credit_cards, "age")
     plot_histogram(credit_cards, "ps")
     plot_histogram(credit_cards, "limit")
     plot_histogram(credit_cards, "education")
     
-    plot_histogram(credit_cards, "credit_default")
-
 
 
 
@@ -223,13 +261,14 @@ def k_means_view_distribution(credit_cards, kmeans):
  
     
 def plot_histogram(df, attribute):
-    
-    plt.hist(df[df['Label']==0][attribute], alpha=0.5, label='0')
-    plt.hist(df[df['Label']==1][attribute], alpha=0.5, label='1')
-    plt.hist(df[df['Label']==2][attribute], alpha=0.5, label='2')
-    plt.hist(df[df['Label']==3][attribute], alpha=0.5, label='3')
+    max_val = max(np.unique(df['Label']))
+    for i in range(0, int(max_val)):
+       plt.hist(df[df['Label']==i][attribute], alpha=0.5, label=str(i))
+
     plt.legend()
     plt.show()
+
+    
     
 def plot_crosstab_given_attribute(credit_cards, attribute, labels):
     
