@@ -19,6 +19,10 @@ def run_daniele_k_means_certain_attributes():
    # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
+    
+    removeOutliers(credit_cards)
+    
+    
     #credit_cards = correct_ps_values(credit_cards)
     #firstly, create a data frame where we have three extra columns: ba, pa, ps
     #such attributes are the average values of the corresponding 6 attributes in the original data frame
@@ -31,11 +35,8 @@ def run_daniele_k_means_certain_attributes():
     attributes_k_means_iter_1 = ['limit', 'education', 'age', 'ba', 'ps', 'pa-apr', 'pa-may', 'pa-jun', 'pa-jul', 'pa-aug', 'pa-sep']
 
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_1)
-    
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_1)
-    
     k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_1, False)
-    
     k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_1, False)
 
     ###ITERATION 2
@@ -43,21 +44,28 @@ def run_daniele_k_means_certain_attributes():
     attributes_k_means_iter_2 = ['limit', 'education', 'age', 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep']
     
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_2)
-    
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_2)
-
     k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_2, False)
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_2, False)    
     
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_2, False)
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 2, attributes_k_means_iter_2, False)    
+
+
+    ###ITERATION 3:
+    #let's test some attributes and comparethem with the results obtained in iteration 2
+    #2 attributes
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, ["ps-may", "ps-jun"], False)  
+    #3 attributes
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, ["ps-jul", "ps-aug", "ps-sep"], False)  
+    #4 attributes
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 9, ["ps-jul", "ps-aug", "ps-sep"], False)  
+
+    #7 attributes
+    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, ["age","ps-apr","ps-may","ps-jun","ps-jul","ps-aug","ps-sep"], False)  
+
     
-    #ITERATION 3
-    attributes_k_means_iter_3 = ['limit', 'education', 'age', 'ps-sep', 'ba-sep']
-    
-    k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_3)
-    
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_3, False)
-    
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_3, False)
+
+
     
     
     
@@ -66,6 +74,7 @@ def run_maddalena_k_means_experiment():
      #load dataset into a dataframe
     credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     credit_cards = remove_missing_values(credit_cards)
+    removeOutliers(credit_cards)
     credit_cards_avg = create_data_frame_avg(credit_cards, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
     credit_cards_k_means = credit_cards_edu_numerical
@@ -76,12 +85,13 @@ def run_maddalena_k_means_experiment():
     minK = 2
     maxK = 10
     
-    
     sys.stdout = open("experiments_minK_" + str(minK) + "_maxK_" + str(maxK) + "_attributes_" + str(len(credit_cards_k_means.columns)) + ".txt", "w")
     for i in range(2, len(credit_cards_k_means.columns)):
         print("Amount of columns: " + str(i))
         results_i = kmeans_(credit_cards_k_means, minK, maxK, i)
         print_results(credit_cards_k_means, results_i, minK)
+        
+    #fine, now let's plot the 
 
     
     #result = pickle.load(open("kmeans_columns_3.p", "rb"))
@@ -182,18 +192,22 @@ def show_center_values_per_cluster_attributes(centers, attributes, credit_cards,
     #loop through every single cluster
     centers = scaler.inverse_transform(centers)
     #i is the index of centers
-    for i in range(1, len(centers)):
+    for i in range(0, len(centers)):
         print("Cluster " + str(i) + ":")
         print("Amount of elements in cluster " + str(i) + " is " + str(len(credit_cards[credit_cards["Label"] == i ]))  ) 
         amount_defaults_in_cluster = len(credit_cards.loc[(credit_cards["credit_default"] == "yes") & (credit_cards["Label"] == i)])
         amount_default_not_in_cluster = len(credit_cards.loc[(credit_cards["credit_default"] == "no") & (credit_cards["Label"] == i)])
+        print("Amount of default elements in cluster " + str(i) + " is " + str(amount_defaults_in_cluster))
+        print("Amount of non-default elements in cluster " + str(i) + " is " + str(amount_default_not_in_cluster))
+
+
         
         print("Ratio of default in cluster i (defaults/non-defaults) " + str((amount_defaults_in_cluster / amount_default_not_in_cluster)))
         print("-------------------------")
         #and loop through every single attribute of the cluster's center
-        for j in range(1, len(centers[i])):
+        for j in range(0, len(centers[i])):
             print(attributes[j])
-            print(centers[i][j])
+            print(round(centers[i][j], 2))
         print("-------------------------")
     
 
