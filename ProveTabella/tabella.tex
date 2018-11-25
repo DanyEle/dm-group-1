@@ -1,0 +1,138 @@
+% chktex-file 44
+% chktex-file 17
+% chktex-file 36
+% chktex-file 13
+% chktex-file 15
+% chktex-file 29
+% chktex-file 40
+% chktex-file 1
+% chktex-file 8
+\documentclass[11pt,a4paper,italian]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{caption}
+\usepackage{version}
+\usepackage{babel}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage[svgnames, table]{xcolor}
+\usepackage{hyperref}
+\usepackage{array}
+%\usepackage{fullpage}
+\usepackage{dsfont}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\usepackage{eurosym}
+\usepackage{tikz}
+\usepackage{collcell}
+\usepackage{verbatim}
+\usepackage[T1]{fontenc}
+\usepackage{extarrows}
+\usepackage[numbers,sort]{natbib}
+\usepackage[shadow,color=green!40]{todonotes}
+\usepackage{cleveref}
+\usepackage[euler-digits]{eulervm}
+\usepackage{palatino}
+\usepackage{pifont}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{arydshln}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\usepackage{siunitx}
+\pgfplotsset{compat=newest}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\sisetup{                           % setup siunitx ...
+        round-mode      = places,   % rounds numbers
+        round-precision = 2,        % to 3 places
+        per-mode        = symbol,   % kg/dm^3 instead kgm^{-3}
+      group-four-digits = true,     %   for 1 234,567       
+        }
+
+\pgfplotstableset{
+  color cells/.style={
+    col sep=space,
+    string type,
+    postproc cell content/.code={%
+      \pgfkeysalso{@cell content=\rule{0cm}{1.5ex}\pgfmathtruncatemacro\number{##1}\cellcolor{green!##1!red!20} ##1}%
+    },
+    display columns/0/.style={
+        column name=\bf MAE,
+        column type ={l} 
+      },
+      display columns/1/.style={
+		    column name=\bf RMSE,
+		    column type = {l|}
+      },
+      display columns/2/.style={
+        column name=$\bf F_1$,
+		    column type = {l}
+      }, 
+      display columns/3/.style={
+        column name=\bf ACC,
+        column type = {l}
+      }, 
+      display columns/4/.style={
+        column name=\bf MAP,
+		    column type = {l}
+      },
+      display columns/5/.style={
+        column name=\bf AUC,
+        column type = {l}
+      },
+      display columns/6/.style={
+        column name=\bf NDCG,
+        column type = {l|}
+      },
+      columns/x/.style={
+      column name={},
+      postproc cell content/.code={}
+    }
+  }
+}
+
+
+\newcommand{\addCorrTable}[2]{
+\begin{table}[h!]
+  \begin{center}
+        \begin{tabular}{|l|}
+            \hline
+            \\
+            \hline
+            \bf MAE \\
+            \bf RMSE \\
+            $\bf F_1$ \\
+            \bf ACC \\
+            \bf MAP\\
+            \bf AUC\\
+            \bf NDCG\\
+            \hline
+      \end{tabular}%
+    \pgfplotstabletypeset[
+      color cells,
+      every head row/.style={
+		    before row={\hline}, % have a rule at top
+        after row={\hline},
+		  },
+		  every last row/.style={after row=\hline}, % rule at bottom
+      %every last column/.style={column type/.add={}{|}},
+  ]{#1}
+  \end{center}
+  \caption{#2}
+\end{table}
+}
+
+\begin{document}
+
+\addCorrTable{spear1024x1024.txt}{Spearman-rho su $1000$ tentativi $1024 \times 1024$}
+
+\end{document}
+
