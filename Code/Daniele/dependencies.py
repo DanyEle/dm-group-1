@@ -1,6 +1,24 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
+import os
+
+os.chdir('/home/daniele/dm-group-1/Code/Daniele')
+
+
+#dependencies on Riccardo's remove missing values function
+sys.path.insert(0, './../Riccardo')
+from MissingValues_3 import remove_missing_values
+
+#dependencies on Gemma's remove outliers function
+sys.path.insert(0, './../Gemma/Part 1')
+from outliers import removeOutliers
+
+#dependencies on Maddalena's formula to correct ps values
+sys.path.insert(0, './../Maddalena')
+from formula_1_2_correction import correct_ps_values
+
 
 
 
@@ -517,50 +535,6 @@ def compute_mean_std_for_columns(list_columns, data_frame):
     print("Overall mean value of input columns is " + str(overall_mean))
     print("Mean STD value of input columns is " + str(overall_std))
 
-    
-    
-#Gemma's function
-def removeOutliers(dataFrame):
-    print("Initial size of data frame: ", dataFrame.shape)
-    baMay = getattr(dataFrame, "ba-may")
-    baApr = getattr(dataFrame, "ba-apr")
-    paAug = getattr(dataFrame, "pa-aug")
-    paApr = getattr(dataFrame, "pa-apr")
-    paMay = getattr(dataFrame, "pa-may")
-    rows = []
-    for i in range(0, len(baMay)):
-        if ((int(baMay[i]) < -5000) | (int(baApr[i]) < -5000) |
-            (int(paAug[i]) > 500000) | (int(paApr[i]) > 500000) |
-            (int(paMay[i]) > 400000)):
-            rows.append(i)
-    print("Visual analysis, number of rows to be dropped: ", len(rows))
-    dataFrame.drop(dataFrame.index[rows], inplace=True)
-    print("Final size of data frame: ", dataFrame.shape)
-    return
-    
-
-    
-#Riccardo's function (v3)
-
-def remove_missing_values(df_in):
-    df_out = df_in
-    #SEX
-    #fill missing values with the mode of sex (female)
-    df_out['sex'] = df_out['sex'].fillna(df_out['sex'].mode()[0])
-    
-    #EDUCATION
-    df_out['education'] = df_out['education'].fillna('others')
-    
-    #STATUS
-    df_out['status'] = df_out['status'].groupby([df_out['sex'], df_out['education']]).apply( 
-      lambda x: x.fillna(x.mode()[0]))
-    
-    #AGE
-    #dataframe without rows where age is -1
-    df_out['age'] = df_out['age'].groupby([df_out['sex'], df_out['education'],
-      df_out['status']]).apply(lambda x: x.replace(-1, x.median()))
-    
-    return df_out
 
 
 

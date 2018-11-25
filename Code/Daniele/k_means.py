@@ -2,26 +2,42 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
+import os
+
+
+os.chdir('/home/daniele/dm-group-1/Code/Daniele')
+
+#dependencies on Riccardo's remove missing values function
+sys.path.insert(0, './../Riccardo')
+from MissingValues_3 import remove_missing_values
+
+#dependencies on Gemma's remove outliers function
+sys.path.insert(0, './../Gemma/Part 1')
+from outliers import removeOutliers
+
+#dependencies on Maddalena's formula to correct ps values
+sys.path.insert(0, './../Maddalena')
+from formula_1_2_correction import correct_ps_values
 
 
 #imports for k-means
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
+from dependencies import *
 
 
 
 def run_daniele_k_means_certain_attributes():
     #load dataset into a dataframe
-    credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
+    credit_cards = pd.read_csv("./../../Dataset/credit_default_train.csv")
 
    # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
     
     removeOutliers(credit_cards)
-    
     
     #credit_cards = correct_ps_values(credit_cards)
     #firstly, create a data frame where we have three extra columns: ba, pa, ps
@@ -167,7 +183,7 @@ def k_means_view_centroids(centers, kmeans, X, credit_cards, attributes, scaler)
     plt.show()
     
     
-    show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler)
+    show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler, kmeans)
 
     
     print('SSE %s' % kmeans.inertia_)
@@ -180,6 +196,8 @@ def k_means_view_centroids(centers, kmeans, X, credit_cards, attributes, scaler)
     print("Amount of elements per cluster:")
     print(dict(zip(bins, hist)))
     
+    
+    
 def k_means_view_distribution(credit_cards, kmeans):
     
     plot_crosstab_given_attribute(credit_cards, "credit_default",  kmeans.labels_)
@@ -187,19 +205,31 @@ def k_means_view_distribution(credit_cards, kmeans):
     plot_crosstab_given_attribute(credit_cards, "status", kmeans.labels_)
     plot_crosstab_given_attribute(credit_cards, "education", kmeans.labels_)
     
+    #scatter plots
+    plt.scatter(credit_cards['age'], credit_cards['ps'], c=kmeans.labels_, s=20)
+    plt.scatter(credit_cards['limit'], credit_cards['ps'], c=kmeans.labels_, s=20)
     
+    plot_histogram(credit_cards, "ps")
+    plot_histogram(credit_cards, "limit")
+    plot_histogram(credit_cards, "education")
     
+    plot_histogram(credit_cards, "credit_default")
+
+
+
+
+        
     
+ 
     
+def plot_histogram(df, attribute):
     
-    
-     #plt.scatter(df['education'], df['age'], c=kmeans.labels_, 
-           # s=20)
-    #plt.scatter(centers[:, 0], centers[:, 3], s=200, marker='*', c='k')
-    #plt.tick_params(axis='both', which='major', labelsize=22)
-    #plt.show()
-    
-    
+    plt.hist(df[df['Label']==0][attribute], alpha=0.5, label='0')
+    plt.hist(df[df['Label']==1][attribute], alpha=0.5, label='1')
+    plt.hist(df[df['Label']==2][attribute], alpha=0.5, label='2')
+    plt.hist(df[df['Label']==3][attribute], alpha=0.5, label='3')
+    plt.legend()
+    plt.show()
     
 def plot_crosstab_given_attribute(credit_cards, attribute, labels):
     
@@ -207,13 +237,16 @@ def plot_crosstab_given_attribute(credit_cards, attribute, labels):
     crosstab = pd.crosstab( labels, credit_cards[attribute])
     crosstab_normalized = crosstab.div(crosstab.sum(1).astype(float), axis=0)
     crosstab_normalized.plot(kind='bar', stacked=True, 
-                   title='Default by ' + str(attribute) + ' class')
+                   title='Clustering occurrences by ' + str(attribute) + ' class')
     
     pd.crosstab(credit_cards[attribute],  labels)
     
         
     
-def show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler):
+def show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler, kmeans):
+    
+    credit_cards["Label"] = kmeans.labels_
+    
     #loop through every single cluster
     centers = scaler.inverse_transform(centers)
     #i is the index of centers
