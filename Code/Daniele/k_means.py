@@ -36,6 +36,7 @@ def run_daniele_k_means_certain_attributes():
 
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_1)
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_1)
+    
     k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_1, False)
     k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_1, False)
 
@@ -45,10 +46,12 @@ def run_daniele_k_means_certain_attributes():
     
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 30, attributes_k_means_iter_2)
     k_means_knee_method_means_given_data_frame(credit_cards_edu_numerical, 10, attributes_k_means_iter_2)
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_2, False)
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_2, False)    
     
-    k_means_given_data_frame_k(credit_cards_edu_numerical, 2, attributes_k_means_iter_2, False)    
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 8, attributes_k_means_iter_2, False)
+    centers, kmeans, X, scaler = k_means_given_data_frame_k(credit_cards_edu_numerical, 4, attributes_k_means_iter_2, False)
+
+    k_means_view_centroids(centers, kmeans, X, credit_cards_edu_numerical, attributes_k_means_iter_2, scaler)    
+    k_means_view_distribution(credit_cards_edu_numerical, kmeans)
 
 
     ###ITERATION 3:
@@ -131,7 +134,6 @@ def k_means_knee_method_means_given_data_frame(df, max_k, attributes):
     
     
 def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
-    credit_cards = df
     df = df[attributes]
     #just run k-means once with the k passed. 
     scaler = MinMaxScaler()
@@ -144,48 +146,71 @@ def k_means_given_data_frame_k(df, k, attributes, inverse_transform):
     #let's see the labels obtained
     np.unique(kmeans.labels_, return_counts=True)
     
-    hist, bins = np.histogram(kmeans.labels_, 
-                          bins=range(0, len(set(kmeans.labels_)) + 1))
-    
     if(inverse_transform):
         centers = scaler.inverse_transform(kmeans.cluster_centers_)
     else:
         centers = kmeans.cluster_centers_
-
-    #plt.scatter(df['education'], df['age'], c=kmeans.labels_, 
-           # s=20)
-    #plt.scatter(centers[:, 0], centers[:, 3], s=200, marker='*', c='k')
-    #plt.tick_params(axis='both', which='major', labelsize=22)
-    #plt.show()
+        
+    return centers, kmeans, X, scaler
+   
+    
+    
+def k_means_view_centroids(centers, kmeans, X, credit_cards, attributes, scaler):
     
     #visualize clusters by parallel coordinates
     plt.figure(figsize=(8, 4))
     for i in range(0, len(centers)):
         plt.plot(centers[i], marker='o', label='Cluster %s' % i)
     plt.tick_params(axis='both', which='major', labelsize=22)
-    plt.xticks(range(0, len(df.columns)), df.columns, fontsize=18, rotation=90)
+    plt.xticks(range(0, len(credit_cards[attributes].columns)), credit_cards[attributes].columns, fontsize=18, rotation=90)
     plt.legend(fontsize=5)
     plt.show()
+    
+    
+    show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler)
+
     
     print('SSE %s' % kmeans.inertia_)
     print('Silhouette %s' % silhouette_score(X, kmeans.labels_))
     
-    #amount of elements per cluster
+    hist, bins = np.histogram(kmeans.labels_, 
+                          bins=range(0, len(set(kmeans.labels_)) + 1))
+    
+     #amount of elements per cluster
     print("Amount of elements per cluster:")
     print(dict(zip(bins, hist)))
-    #centroid attributes' values per cluster
-    #print(centers)    
     
-    credit_cards['Label'] = kmeans.labels_
-    pd.crosstab(credit_cards['credit_default'], credit_cards['Label'])
-    crosstab = pd.crosstab( kmeans.labels_, credit_cards['credit_default'])
+def k_means_view_distribution(credit_cards, kmeans):
+    
+    plot_crosstab_given_attribute(credit_cards, "credit_default",  kmeans.labels_)
+    plot_crosstab_given_attribute(credit_cards, "sex", kmeans.labels_)
+    plot_crosstab_given_attribute(credit_cards, "status", kmeans.labels_)
+    plot_crosstab_given_attribute(credit_cards, "education", kmeans.labels_)
+    
+    
+    
+    
+    
+    
+    
+     #plt.scatter(df['education'], df['age'], c=kmeans.labels_, 
+           # s=20)
+    #plt.scatter(centers[:, 0], centers[:, 3], s=200, marker='*', c='k')
+    #plt.tick_params(axis='both', which='major', labelsize=22)
+    #plt.show()
+    
+    
+    
+def plot_crosstab_given_attribute(credit_cards, attribute, labels):
+    
+    pd.crosstab(credit_cards[attribute], labels)
+    crosstab = pd.crosstab( labels, credit_cards[attribute])
     crosstab_normalized = crosstab.div(crosstab.sum(1).astype(float), axis=0)
     crosstab_normalized.plot(kind='bar', stacked=True, 
-                   title='Default by ' + str('credit_default') + ' class')
+                   title='Default by ' + str(attribute) + ' class')
     
-    pd.crosstab(credit_cards['credit_default'],  kmeans.labels_)
+    pd.crosstab(credit_cards[attribute],  labels)
     
-    show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler)
         
     
 def show_center_values_per_cluster_attributes(centers, attributes, credit_cards, scaler):

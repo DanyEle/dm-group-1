@@ -9,13 +9,12 @@ import matplotlib.pyplot as plt
 
 def main():
     #load dataset into a dataframe
-    credit_cards = pd.read_csv("D:\dm-group-1\Dataset\credit_default_train.csv")
 
-   # credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
+    credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
     credit_cards = remove_missing_values(credit_cards)
     
-    column_names = credit_cards.columns
+    #credit_cards = correct_ps_values(credit_cards)
     #ba = balance[Continuous]
     columns_ba = ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"]
     #pa = expense[Continuous]
@@ -45,6 +44,9 @@ def main():
     compute_correlation_between_attributes(credit_cards_avg, columns_pa)
     
     compute_correlation_between_attributes(credit_cards_avg, columns_ps)
+    
+    #correlation matrix among all attributes
+    round(credit_cards_avg.corr() * 100, 1)
     
     #the only significant correlation (0.37) appears to be between limit and pa, and limit and ba (0.31)
     
@@ -517,8 +519,28 @@ def compute_mean_std_for_columns(list_columns, data_frame):
 
     
     
+#Gemma's function
+def removeOutliers(dataFrame):
+    print("Initial size of data frame: ", dataFrame.shape)
+    baMay = getattr(dataFrame, "ba-may")
+    baApr = getattr(dataFrame, "ba-apr")
+    paAug = getattr(dataFrame, "pa-aug")
+    paApr = getattr(dataFrame, "pa-apr")
+    paMay = getattr(dataFrame, "pa-may")
+    rows = []
+    for i in range(0, len(baMay)):
+        if ((int(baMay[i]) < -5000) | (int(baApr[i]) < -5000) |
+            (int(paAug[i]) > 500000) | (int(paApr[i]) > 500000) |
+            (int(paMay[i]) > 400000)):
+            rows.append(i)
+    print("Visual analysis, number of rows to be dropped: ", len(rows))
+    dataFrame.drop(dataFrame.index[rows], inplace=True)
+    print("Final size of data frame: ", dataFrame.shape)
+    return
     
-#Riccardo's function
+
+    
+#Riccardo's function (v3)
 
 def remove_missing_values(df_in):
     df_out = df_in
