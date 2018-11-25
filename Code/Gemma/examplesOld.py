@@ -3,7 +3,7 @@ import sys
 from plots import printPlots
 from plots import plotNumOutliers
 sys.path.insert(0, '../Riccardo')
-from MissingValues_3 import remove_missing_values
+from MissingValues_2 import remove_missing_values
 from outliers import countOutliers
 from outliers import removeOutliers
 import pandas as pd
@@ -70,6 +70,7 @@ def countAll(cc, k):
     numOutliers = []
     rows = []
     totalLength = len(cc.limit)
+    print("Lines in dataset: ", totalLength)
 
     limit = countOutliers(cc, "limit", k)
     print("Outliers in limit: ", limit)
@@ -172,7 +173,7 @@ def countAll(cc, k):
 #filePath = "../../Dataset/credit_default_train_small.csv"
 
 filePath = "../../Dataset/credit_default_train.csv"
-newPath = "boxplots/Original/"
+newPath = "boxplots/"
 newPathNoMV = "boxplots/NoMissingValues/"
 newPathNoO = "boxplots/NoOutliers/"
 if not os.path.exists(newPathNoO):
@@ -185,33 +186,26 @@ if not os.path.exists(newPathNoMV):
 #figExtension = "png"
 figExtension = "pdf"
 #figExtension = "svg"
+dataFrame = pd.read_csv(filePath)
+deep1 = dataFrame.copy()
+deep2 = dataFrame.copy()
+dataFrameNoMV = remove_missing_values(deep1)
+dataNew = removeOutliers(deep2)
 
-#Original boxplots
+#Plotting dataset
 generatePlots(newPath, filePath)
 
-#Copies of dataset
-originalDF = pd.read_csv(filePath)
-df1 = originalDF.copy()
-dataFrameNoMV = remove_missing_values(df1)
-
-#Boxplots without missing values
+#Plotting dataset without missing values
 generatePlots(newPathNoMV, dataFrameNoMV, 1)
+
 print("Shape of dataset without missing values: ", dataFrameNoMV.shape)
-#Boxplots without missing values on a logarithmic scale
+#Plotting dataset without missing values on a logarithmic scale
 generatePlots(newPathNoMV, dataFrameNoMV, 1, 1)
 
-#Counting outliers algebraic method
+#Plotting dataset without missing values and outliers
+print("Shape of dataset without outliers: ", dataNew.shape)
+generatePlots(newPathNoO, dataNew, 1)
+
+#Counting outliers
 k = 1.5
-print("~~~~~~~~~~~Algebraic method for outliers~~~~~~~~~~~~~")
 countAll(dataFrameNoMV, k)
-print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
-#Elimination of outliers
-removeOutliers(dataFrameNoMV)
-
-#Boxplots without missing values and outliers
-print("Shape of dataset without outliers: ", dataFrameNoMV.shape)
-generatePlots(newPathNoO, dataFrameNoMV, 1)
-
-#Saving of new dataframe
-dataFrameNoMV.to_csv("newCsv.csv", sep=",", header=True, index=False)
