@@ -7,7 +7,8 @@
 % chktex-file 40
 % chktex-file 1
 % chktex-file 8
-\documentclass[11pt,a4paper,italian]{book}
+
+\documentclass[11pt,a4paper,italian,landscape]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{caption}
 \usepackage{version}
@@ -24,7 +25,7 @@
 \usepackage[svgnames, table]{xcolor}
 \usepackage{hyperref}
 \usepackage{array}
-%\usepackage{fullpage}
+\usepackage{fullpage}
 \usepackage{dsfont}
 \usepackage{amssymb}
 \usepackage{siunitx}
@@ -57,13 +58,23 @@
         }
 
 \pgfplotstableset{
+  font={\tiny},
   color cells/.style={
-    col sep=tab,
+    col sep=space,
     string type,
     postproc cell content/.code={%
-      \pgfkeysalso{@cell content=\rule{0cm}{1.5ex}\pgfmathtruncatemacro\number{##1}\cellcolor{green!##1!red!20} ##1}%
+   \pgfkeysalso{%
+        @cell content=\rule{0cm}{1.5ex}%
+        \pgfmathsetmacro\number{int(##1)}%
+        \pgfmathsetmacro\alargenumber{int(add(abs(\number), 50))}
+        \pgfmathsetmacro\anumber{int(abs(multiply(\number, 4)))}
+        \ifnum\number>0\edef\setcolor{\noexpand\cellcolor{green!\number}}\setcolor
+        \else\ifnum\number<1\edef\setcolor{\noexpand\cellcolor{green!\number!red!25}}\setcolor\fi%        
+        \fi%
+        \ifnum\number<0\edef\setcolor{\noexpand\cellcolor{red!\alargenumber}}\setcolor\fi%
+        ##1}%
     },
-    display columns/0/.style={
+      display columns/0/.style={
         column name=\bf limit,
         column type ={l} 
       },
@@ -153,7 +164,7 @@
       },
       display columns/22/.style={
         column name=\bf ba,
-        column type = {l}
+        column type = {l|}
       }
     }
   }
@@ -161,8 +172,38 @@
 
 
 \newcommand{\addCorrTable}[2]{
-\begin{table}[h!]
-  \begin{center}
+\begin{table}
+%  \centering
+    \tiny
+       \begin{tabular}{|l|}
+            \hline
+            \\
+            \hline
+            \bf limit \\
+            \bf age \\
+            \bf ps-sep \\
+            \bf ps-aug \\
+            \bf ps-jul \\
+            \bf ps-jun \\
+            \bf ps-may \\
+            \bf ps-apr \\
+            \bf ba-sep \\
+            \bf ba-aug \\
+            \bf ba-jul \\
+            \bf ba-jun \\
+            \bf ba-may \\
+            \bf ba-apr \\
+            \bf pa-sep \\
+            \bf pa-aug \\
+            \bf pa-jul \\
+            \bf pa-jun \\
+            \bf pa-may \\
+            \bf pa-apr \\
+            \bf ps \\
+            \bf pa\\
+            \bf ba\\
+            \hline
+      \end{tabular}%
     \pgfplotstabletypeset[
       color cells,
       every head row/.style={
@@ -170,16 +211,16 @@
         after row={\hline},
 		  },
 		  every last row/.style={after row=\hline}, % rule at bottom
-      %every last column/.style={column type/.add={}{|}},
+      every last column/.style={column type/.add={}{|}},
     ]{#1}
-  \end{center}
   \caption{#2}
-\end{table}
+\end{table} 
 }
 
 \begin{document}
 
 %\addCorrTable{spear1024x1024.txt}{Spearman-rho su $1000$ tentativi $1024 \times 1024$}
+
 
 \addCorrTable{c1.txt}{this is my caption}
 
