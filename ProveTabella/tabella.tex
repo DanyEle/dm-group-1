@@ -45,7 +45,6 @@
 \usepackage{arydshln}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
-\usepackage{caption}
 \usepackage{siunitx}
 \pgfplotsset{compat=newest}
 \newcommand{\cmark}{\ding{51}}%
@@ -59,63 +58,111 @@
 
 \pgfplotstableset{
   color cells/.style={
-    col sep=space,
+    col sep=tab,
     string type,
     postproc cell content/.code={%
       \pgfkeysalso{@cell content=\rule{0cm}{1.5ex}\pgfmathtruncatemacro\number{##1}\cellcolor{green!##1!red!20} ##1}%
     },
     display columns/0/.style={
-        column name=\bf MAE,
+        column name=\bf limit,
         column type ={l} 
       },
       display columns/1/.style={
-		    column name=\bf RMSE,
-		    column type = {l|}
+		    column name=\bf age,
+		    column type = {l}
       },
       display columns/2/.style={
-        column name=$\bf F_1$,
+        column name=\bf ps-sep,
 		    column type = {l}
       }, 
       display columns/3/.style={
-        column name=\bf ACC,
+        column name=\bf ps-aug,
         column type = {l}
       }, 
       display columns/4/.style={
-        column name=\bf MAP,
+        column name=\bf ps-jul,
 		    column type = {l}
       },
       display columns/5/.style={
-        column name=\bf AUC,
+        column name=\bf ps-jun,
         column type = {l}
       },
       display columns/6/.style={
-        column name=\bf NDCG,
-        column type = {l|}
+        column name=\bf ps-may,
+        column type = {l}
       },
-      columns/x/.style={
-      column name={},
-      postproc cell content/.code={}
+      display columns/7/.style={
+        column name=\bf ps-apr,
+        column type = {l}
+      },
+      display columns/8/.style={
+        column name=\bf ba-sep,
+        column type = {l}
+      },
+      display columns/9/.style={
+        column name=\bf ba-aug,
+        column type = {l}
+      },
+      display columns/10/.style={
+        column name=\bf ba-jul,
+        column type = {l}
+      },
+      display columns/11/.style={
+        column name=\bf ba-jun,
+        column type = {l}
+      },
+      display columns/12/.style={
+        column name=\bf ba-may,
+        column type = {l}
+      },
+      display columns/13/.style={
+        column name=\bf ba-apr,
+        column type = {l}
+      },
+      display columns/14/.style={
+        column name=\bf pa-sep,
+        column type = {l}
+      },
+      display columns/15/.style={
+        column name=\bf pa-aug,
+        column type = {l}
+      },
+      display columns/16/.style={
+        column name=\bf pa-jul,
+        column type = {l}
+      },
+      display columns/17/.style={
+        column name=\bf pa-jun,
+        column type = {l}
+      },
+      display columns/18/.style={
+        column name=\bf pa-may,
+        column type = {l}
+      },
+      display columns/19/.style={
+        column name=\bf pa-apr,
+        column type = {l}
+      },
+      display columns/20/.style={
+        column name=\bf ps,
+        column type = {l}
+      },
+      display columns/21/.style={
+        column name=\bf pa,
+        column type = {l}
+      },
+      display columns/22/.style={
+        column name=\bf ba,
+        column type = {l}
+      }
     }
   }
-}
+
 
 
 \newcommand{\addCorrTable}[2]{
 \begin{table}[h!]
   \begin{center}
-        \begin{tabular}{|l|}
-            \hline
-            \\
-            \hline
-            \bf MAE \\
-            \bf RMSE \\
-            $\bf F_1$ \\
-            \bf ACC \\
-            \bf MAP\\
-            \bf AUC\\
-            \bf NDCG\\
-            \hline
-      \end{tabular}%
     \pgfplotstabletypeset[
       color cells,
       every head row/.style={
@@ -124,7 +171,7 @@
 		  },
 		  every last row/.style={after row=\hline}, % rule at bottom
       %every last column/.style={column type/.add={}{|}},
-  ]{#1}
+    ]{#1}
   \end{center}
   \caption{#2}
 \end{table}
@@ -132,7 +179,9 @@
 
 \begin{document}
 
-\addCorrTable{spear1024x1024.txt}{Spearman-rho su $1000$ tentativi $1024 \times 1024$}
+%\addCorrTable{spear1024x1024.txt}{Spearman-rho su $1000$ tentativi $1024 \times 1024$}
+
+\addCorrTable{c1.txt}{this is my caption}
 
 \end{document}
 
