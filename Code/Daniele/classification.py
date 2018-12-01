@@ -14,6 +14,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_auc_score, roc_curve, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.metrics import roc_curve, auc, roc_auc_score
+
 
 import seaborn as sns
 get_ipython().run_line_magic('matplotlib', 'inline')
@@ -24,7 +28,17 @@ from keras.models  import Sequential, K
 from keras.layers import Input, Dense, Flatten, Dropout, BatchNormalization
 from keras.optimizers import Adam, SGD, RMSprop
 
+#stuff for decision trees
+from sklearn.tree import DecisionTreeClassifier
+import pydotplus
+from sklearn import tree
+from IPython.display import Image
 
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+
+from sklearn.neighbors import KNeighborsClassifier
 
 
 os.chdir('/home/daniele/dm-group-1/Code/Daniele')
@@ -51,20 +65,23 @@ def run_deep_classification_algs():
     
     """INITIALIZE INPUT DATA"""
     #initialize data frame with the attributes we wanna consider
-    attributes_deep_learning = ["limit", "age", "education",
+    attributes = ["limit", "age", "education",
                                 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep',
                                 "ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", 
                                 "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
+    
+   # attributes_deep_learning = ["limit", "age", "education",
+    #                            'ps', "pa"]
     
     
     url_train = "../../Dataset/credit_default_train.csv"
     
     #training data frame
-    credit_cards_deep_learning_train, labels_train = load_pre_process_dataset(url_train, True, attributes_deep_learning)
+    credit_cards_deep_learning_train, labels_train = load_pre_process_dataset(url_train, True, attributes)
 
     #test dataframe, no labels in this case
     url_test = "../../Dataset/credit_default_test.csv"
-    credit_cards_deep_learning_test = load_pre_process_dataset(url_test, False, attributes_deep_learning)
+    credit_cards_deep_learning_test = load_pre_process_dataset(url_test, False, attributes)
     
     #input training data
     X = credit_cards_deep_learning_train.values
@@ -77,22 +94,6 @@ def run_deep_classification_algs():
     #split the dataset- 80-20
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=11111)
     
-    """RANDOM FOREST"""
-    #NB: No need to normalize the input data with Random Forest!
-    
-    ## Train the RF Model
-    rf_model = RandomForestClassifier(n_estimators=200) 
-    #we train both with X input data and Y input data
-    rf_model.fit(X_train, y_train)
-    
-    #check the model accuracy obtained with RF
-    #Max model accuracy obtained: 0.823 on the validation ,0.811 on the test dataset
-    model_compute_test_validation_accuracy(rf_model, X_test, y_test)
-    
-    #output the results to a file
-   # output_model_results_to_file(rf_model, "group_1_submission_6_RF.txt", credit_cards_deep_learning_test, None)
-    
-    
     """DEEP LEARNING"""
     
     #We now need to normalize the data
@@ -104,7 +105,7 @@ def run_deep_classification_algs():
     
     """Model 1 - One hidden layer"""
     #First model try: 1 single hidden layer with 14 hidden nodes. 
-    model_1 = Sequential ([ Dense(14, input_shape=(21,), activation="relu"), Dense(1, activation="sigmoid")])
+    model_1 = Sequential ([ Dense(4, input_shape=(5,), activation="relu"), Dense(1, activation="sigmoid")])
     
     model_1.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
     
@@ -118,7 +119,7 @@ def run_deep_classification_algs():
     
     """Model 2 - three hidden layers"""
     
-
+    #probably overfitting
     model_2 = Sequential([
         #3 hidden layers with 14 neurons in each one
         Dense(14, input_shape=(21,), activation="relu"),
@@ -128,6 +129,7 @@ def run_deep_classification_algs():
         Dense(1, activation="sigmoid")
     ])
     
+    #0.723 on the test dataset :(
     model_2.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
         
     run_hist_2 = model_2.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=1500)
@@ -136,14 +138,132 @@ def run_deep_classification_algs():
     output_model_results_to_file(model_1, "group_1_submission_8_DL_M2.txt", credit_cards_deep_learning_test, None)
 
 
+    """DECISION TREES"""
+    
+    clf = DecisionTreeClassifier(criterion='entropy', max_depth=2, 
+                             min_samples_split=2, min_samples_leaf=1)
+    
+    clf.fit(X_train, y_train)
+    
+    #let's visualize feature importance
+    for col, imp in zip(attributes, clf.feature_importances_):
+        print(col, imp)
+        
+    model_compute_test_validation_accuracy(clf, X_test, y_test)
+    
+    #let's try tuning the hyperparameters by grid search
+    param_list_grid = {'min_samples_split': [2, 5, 10, 20],
+                  'min_samples_leaf': [1, 5, 10, 20],
+                 }
+    
+    clf_optimized_grid = optimize_model(clf, 1, param_list_grid, X, y)
+    
+    model_compute_test_validation_accuracy(clf_optimized_grid, X_test, y_test)
+    
+    #and let's try tuning the hyperparameters by Randomized search
+    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 20)),
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
+             }
+    
+    clf_optimized_rand_search = optimize_model(clf, 2, param_list_rand_search, X, y)
+
+    model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
+
+    #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
     
     
+    """RANDOM FOREST"""
+    
+    
+    rf_model = RandomForestClassifier(n_estimators=200, 
+                                 criterion='gini', 
+                                 max_depth=None, 
+                                 min_samples_split=2, 
+                                 min_samples_leaf=1, 
+                                 class_weight=None)
+    
+    rf_model.fit(X_train, y_train)
+    
+    model_compute_test_validation_accuracy(rf_model, X_test, y_test)
+    
+    #let's try finding best parameters for random forest
+    
+      #let's try tuning the hyperparameters by grid search
+    param_list_grid = {'min_samples_split': [2, 5, 10, 20],
+                  'min_samples_leaf': [1, 5, 10, 20],
+                 }
+    
+    #F1-score = 0.86; accuracy; 0.861; roc-auc: 0.937;
+    rf_model_optimized_grid = optimize_model(rf_model_optimized_grid, 1, param_list_grid, X, y)
+
+    model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
+    
+    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_10_RF_grid.txt", credit_cards_deep_learning_test, None)
+        
+
+    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 50)),
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
+             }
+    
+    #F1-score= 0.83; accuracy = 0.842; roc-auc = 0.899
+    clf_optimized_rand_search = optimize_model(rf_model, 2, param_list_rand_search, X, y)
+    model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
+
+    """K-Nearest Neighbors"""
+    
+    clf = KNeighborsClassifier(n_neighbors=5)
+    
+    
+    output_model_results_to_file(clf_optimized_rand_search, "group_1_submission_11_RF_rand_search.txt", credit_cards_deep_learning_test, None)
+
+
+    
+    
+
         
         
     
+            
+            
     
     
-"""ALL THE FUNCTIONS REQUIRED FOR DEEP LEARNING UNDERNEATH"""
+    
+"""ALL THE FUNCTIONS REQUIRED FOR CLASSIFICATION UNDERNEATH"""
+
+#optimization_method == 1 --> Grid
+#optimization_method == 2 --> Randomized Search
+def optimize_model(model, optimization_method, param_list, X, y):
+    if(optimization_method == 1):
+        grid_search = GridSearchCV(model, param_grid=param_list)
+        grid_search.fit(X, y)
+        clf = grid_search.best_estimator_
+        report(grid_search.cv_results_, n_top=3)
+        return(clf)
+        
+        
+    elif(optimization_method == 2):
+        random_search = RandomizedSearchCV(model, param_distributions=param_list, n_iter=100)
+        random_search.fit(X, y)
+        clf = random_search.best_estimator_
+        report(random_search.cv_results_, n_top=3)
+        return(clf)
+        
+     
+
+
+def report(results, n_top=3):
+    for i in range(1, n_top + 1):
+        candidates = np.flatnonzero(results['rank_test_score'] == i)
+        for candidate in candidates:
+            print("Model with rank: {0}".format(i))
+            print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
+                  results['mean_test_score'][candidate],
+                  results['std_test_score'][candidate]))
+            print("Parameters: {0}".format(results['params'][candidate]))
+            print("")
+
 
 
 def output_model_results_to_file(keras_model, file_name, credit_cards_deep_learning_test, normalizer):
@@ -266,6 +386,8 @@ def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
     print('Accuracy on test dataset is {:.3f}'.format(accuracy_score(y_test,y_pred_class)))
     print('roc-auc is {:.3f}'.format(roc_auc_score(y_test,y_pred_prob[:,1])))
     #plot_roc(y_test, y_pred_prob, 'NN')
+    
+    print(classification_report(y_test, y_pred_class))
     
     
     
