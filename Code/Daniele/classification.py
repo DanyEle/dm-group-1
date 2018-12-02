@@ -194,12 +194,12 @@ def run_deep_classification_algs():
                   'min_samples_leaf': [1, 5, 10, 20],
                  }
     
-    #F1-score = 0.86; accuracy; 0.861; roc-auc: 0.937;
-    rf_model_optimized_grid = optimize_model(rf_model_optimized_grid, 1, param_list_grid, X, y)
+    #F1-score = 0.86; accuracy; 0.873; roc-auc: 0.953;
+    rf_model_optimized_grid = optimize_model(rf_model, 1, param_list_grid, X, y)
 
     model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
     
-    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_10_RF_grid.txt", credit_cards_deep_learning_test, None)
+    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_12_RF_grid.txt", credit_cards_deep_learning_test, None)
         
 
     param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 50)),
@@ -207,26 +207,51 @@ def run_deep_classification_algs():
               'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
              }
     
-    #F1-score= 0.83; accuracy = 0.842; roc-auc = 0.899
+    #F1-score= 0.91; accuracy = 0.917; roc-auc = 0.982
     clf_optimized_rand_search = optimize_model(rf_model, 2, param_list_rand_search, X, y)
+    
     model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
-
-    """K-Nearest Neighbors"""
     
-    clf = KNeighborsClassifier(n_neighbors=5)
+    output_model_results_to_file(clf_optimized_rand_search, "group_1_submission_11_rand_search.txt", credit_cards_deep_learning_test, None)
     
+    import pickle
+    pickle.dump(clf_optimized_rand_search, open('rf_model_optimized.p', 'wb'))
     
-    output_model_results_to_file(clf_optimized_rand_search, "group_1_submission_11_RF_rand_search.txt", credit_cards_deep_learning_test, None)
-
-
-    
-    
-
-        
         
     
-            
-            
+    
+
+    
+    
+    
+
+
+    
+    
+    
+def load_all_labels():
+    #some random experiments
+    
+    
+    url_train = "../../Dataset/UCI_Credit_Card.csv"
+    
+    attributes = ["limit", "age", "education",
+                                'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep',
+                                "ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", 
+                                "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep", "credit_default"]
+    #training data frame
+    credit_cards_deep_learning_train = load_pre_process_dataset(url_train, False, attributes)
+        
+    all_y_labels = credit_cards_deep_learning_train["credit_default"]
+    
+    
+    credit_cards_deep_learning_train = credit_cards_deep_learning_train.drop(columns=["credit_default"])
+    
+    y_pred_class = clf_optimized_rand_search.predict(credit_cards_deep_learning_train.values) #HARD
+    
+    
+    print('Accuracy on test dataset is {:.3f}'.format(accuracy_score(all_y_labels,y_pred_class)))
+
     
     
     
@@ -336,13 +361,15 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
     
     #credit_cards_no_missing_outliers = correct_ps_values(credit_cards_df)
     
-    
     #and remove outliers (this function operates in place)
     if(train_dataset == True):
-        removeOutliers(credit_cards_no_missing_outliers)
+        #removeOutliers(credit_cards_no_missing_outliers)
+        pass
         
     #create mean value columns
     credit_cards_avg = create_data_frame_avg(credit_cards_no_missing_outliers, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
+    #credit_cards_edu_numerical = credit_cards_avg
+
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
     #and convert the credit_default into a numerical attribute as well
     if(train_dataset == True):
