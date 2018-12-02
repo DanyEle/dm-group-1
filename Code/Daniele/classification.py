@@ -18,6 +18,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 from sklearn.metrics import roc_curve, auc, roc_auc_score
 
+from sklearn.preprocessing import LabelEncoder
+
 
 import seaborn as sns
 get_ipython().run_line_magic('matplotlib', 'inline')
@@ -65,7 +67,7 @@ def run_deep_classification_algs():
     
     """INITIALIZE INPUT DATA"""
     #initialize data frame with the attributes we wanna consider
-    attributes = ["limit", "age", "education",
+    attributes = ["limit", "sex","education", "status", "age",
                                 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep',
                                 "ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", 
                                 "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
@@ -199,7 +201,7 @@ def run_deep_classification_algs():
 
     model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
     
-    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_12_RF_grid.txt", credit_cards_deep_learning_test, None)
+    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_13_RF_grid_sex_status.txt", credit_cards_deep_learning_test, None)
         
 
     param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 50)),
@@ -350,6 +352,19 @@ def educ_category_to_number(category):
 
 
 
+def convert_sex_status_to_numerical(df):
+     #convert sex and status to numerical
+    label_encoders = dict()
+    column2encode = ['sex', 'status']
+    
+    for col in column2encode:
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col])
+        label_encoders[col] = le
+        
+    return(df)
+
+
 #if train_dataset == True --> also remove missing values and outliers
 #if train_dataset == False --> Do not remove missing values and outliers
 def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
@@ -359,12 +374,14 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
     #firstly, remove missing values
     credit_cards_no_missing_outliers = remove_missing_values(credit_cards_df)
     
+    credit_cards_no_missing_outliers = convert_sex_status_to_numerical(credit_cards_no_missing_outliers)
+    
     #credit_cards_no_missing_outliers = correct_ps_values(credit_cards_df)
     
     #and remove outliers (this function operates in place)
     if(train_dataset == True):
-        #removeOutliers(credit_cards_no_missing_outliers)
-        pass
+        removeOutliers(credit_cards_no_missing_outliers)
+        #pass
         
     #create mean value columns
     credit_cards_avg = create_data_frame_avg(credit_cards_no_missing_outliers, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
