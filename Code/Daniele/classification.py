@@ -66,17 +66,18 @@ from formula_1_2_correction import correct_ps_values
 def run_deep_classification_algs():
     
     """INITIALIZE INPUT DATA"""
+    
+    
     #initialize data frame with the attributes we wanna consider
-    attributes = ["limit", "sex","education", "status", "age",
+    attributes = ["limit", "education", "sex", "status", "age",
                                 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep',
                                 "ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", 
                                 "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
     
-   # attributes_deep_learning = ["limit", "age", "education",
-    #                            'ps', "pa"]
+    #try to create a model based on the whole dataset
+    #url_train = "../../Dataset/credit_default_train.csv"
+    url_train = "../../Dataset/UCI_Credit_Card.csv"
     
-    
-    url_train = "../../Dataset/credit_default_train.csv"
     
     #training data frame
     credit_cards_deep_learning_train, labels_train = load_pre_process_dataset(url_train, True, attributes)
@@ -177,7 +178,6 @@ def run_deep_classification_algs():
     
     """RANDOM FOREST"""
     
-    
     rf_model = RandomForestClassifier(n_estimators=200, 
                                  criterion='gini', 
                                  max_depth=None, 
@@ -197,11 +197,14 @@ def run_deep_classification_algs():
                  }
     
     #F1-score = 0.86; accuracy; 0.873; roc-auc: 0.953;
+    
+    #FULL DATASET, no status and sex - F1 score= 0.81, accuracy = 0.0828, roc-auc = 0.888
+    #FULL DATASET, status and sex - F1 score = 0.86. accuracy = 0.876. roc-auc = 0.970
     rf_model_optimized_grid = optimize_model(rf_model, 1, param_list_grid, X, y)
 
     model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
     
-    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_13_RF_grid_sex_status.txt", credit_cards_deep_learning_test, None)
+    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_14_RF_grid_full.txt", credit_cards_deep_learning_test, None)
         
 
     param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 50)),
@@ -318,7 +321,12 @@ def convert_credit_default_to_numerical_attribute(credit_cards_input):
     credit_default_column_new = []
    
     for default_row  in credit_default_column:
-        credit_default_column_new.append(default_to_number(default_row))
+        #if found a string, convert string to number
+        if not isinstance(default_row, int):
+            credit_default_column_new.append(default_to_number(default_row))
+        #if found a number, just leave the number be
+        else:
+            credit_default_column_new.append(default_row)
        
     credit_cards_input["credit_default"] = credit_default_column_new
     return credit_cards_input
@@ -335,12 +343,19 @@ def convert_education_to_numerical_attribute(credit_cards_input):
     education_column_new = []
    
     for education_row  in education_column:
-        education_column_new.append(educ_category_to_number(education_row))
+        #if a string, convert to integer
+        if not isinstance(education_row, int):
+            education_column_new.append(educ_category_to_number(education_row))
+        else:
+        #if already an integer, let it be
+            education_column_new.append(education_row)
+            
        
     credit_cards_input["education"] = education_column_new
     return credit_cards_input
 
 def educ_category_to_number(category):
+    
     if category == "others":
         return 0
     elif category == "high school":
