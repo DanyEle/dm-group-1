@@ -32,7 +32,7 @@ from keras.optimizers import Adam, SGD, RMSprop
 
 #stuff for decision trees
 from sklearn.tree import DecisionTreeClassifier
-import pydotplus
+import pydotplus 
 from sklearn import tree
 from IPython.display import Image
 
@@ -74,9 +74,12 @@ def run_deep_classification_algs():
                                 "ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", 
                                 "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
     
+  
+    
+    
     #try to create a model based on the whole dataset
-    #url_train = "../../Dataset/credit_default_train.csv"
-    url_train = "../../Dataset/UCI_Credit_Card.csv"
+    url_train = "../../Dataset/credit_default_train.csv"
+    #url_train = "../../Dataset/UCI_Credit_Card.csv"
     
     
     #training data frame
@@ -143,35 +146,74 @@ def run_deep_classification_algs():
 
     """DECISION TREES"""
     
-    clf = DecisionTreeClassifier(criterion='entropy', max_depth=2, 
+    dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
                              min_samples_split=2, min_samples_leaf=1)
     
-    clf.fit(X_train, y_train)
-    
+    dec_tree.fit(X_train, y_train)
+
     #let's visualize feature importance
-    for col, imp in zip(attributes, clf.feature_importances_):
+    for col, imp in zip(attributes, dec_tree.feature_importances_):
         print(col, imp)
         
-    model_compute_test_validation_accuracy(clf, X_test, y_test)
+    #we need to convert the decision tree's classes into labels again
+    dec_tree.classes_ = ["no", "yes"]
+        
+    dot_data = tree.export_graphviz(dec_tree, out_file=None,  
+                                feature_names=attributes, 
+                                class_names=dec_tree.classes_,  
+                                filled=True, rounded=True,  
+                                special_characters=True)  
+    graph = pydotplus.graph_from_dot_data(dot_data)  
+    Image(graph.create_png())
+        
+    model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
     
+    
+    ##OPTIMIZE BY GRID SEARCH
+
     #let's try tuning the hyperparameters by grid search
     param_list_grid = {'min_samples_split': [2, 5, 10, 20],
                   'min_samples_leaf': [1, 5, 10, 20],
                  }
+
     
-    clf_optimized_grid = optimize_model(clf, 1, param_list_grid, X, y)
+    dec_tree_optimized_grid = optimize_model(dec_tree, 1, param_list_grid, X, y)
+    model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
     
-    model_compute_test_validation_accuracy(clf_optimized_grid, X_test, y_test)
-    
-    #and let's try tuning the hyperparameters by Randomized search
+    ##OPTIMIZE BY RANDOMIZED SEARCH
     param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 20)),
               'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
               'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
              }
+     
+    dec_tree_optimized_grid.classes_ = ["no", "yes"]
     
-    clf_optimized_rand_search = optimize_model(clf, 2, param_list_rand_search, X, y)
+    
+    dot_data = tree.export_graphviz(dec_tree_optimized_grid, out_file=None,  
+                                feature_names=attributes, 
+                                class_names=dec_tree_optimized_grid.classes_,  
+                                filled=True, rounded=True,  
+                                special_characters=True)  
+    graph = pydotplus.graph_from_dot_data(dot_data)  
+    Image(graph.create_png())
+    
+    
+    
+    ##OPTIMIZE BY RAND SEARCH   
+    
+    dec_tree_rand_search = optimize_model(dec_tree, 2, param_list_rand_search, X, y)   
+    model_compute_test_validation_accuracy(dec_tree_rand_search, X_test, y_test)
+    dec_tree_rand_search.classes_ = ["no", "yes"]
 
-    model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
+    ##let's visualize the tree
+    dot_data = tree.export_graphviz(dec_tree_rand_search, out_file=None,  
+                                feature_names=attributes, 
+                                class_names=dec_tree_rand_search.classes_,  
+                                filled=True, rounded=True,  
+                                special_characters=True)  
+    graph = pydotplus.graph_from_dot_data(dot_data)  
+    Image(graph.create_png())
+        
 
     #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
     
@@ -227,10 +269,6 @@ def run_deep_classification_algs():
     
 
     
-    
-    
-
-
     
     
     
@@ -400,7 +438,6 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
         
     #create mean value columns
     credit_cards_avg = create_data_frame_avg(credit_cards_no_missing_outliers, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
-    #credit_cards_edu_numerical = credit_cards_avg
 
     credit_cards_edu_numerical = convert_education_to_numerical_attribute(credit_cards_avg)
     #and convert the credit_default into a numerical attribute as well
@@ -435,6 +472,8 @@ def plot_model_train_validation_loss(keras_model):
     ax.plot(keras_model.history["loss"],'r', marker='.', label="Train Loss")
     ax.plot(keras_model.history["val_loss"],'b', marker='.', label="Validation Loss")
     ax.legend()
+    
+    
     
 def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
 
