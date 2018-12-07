@@ -248,6 +248,8 @@ def k_means_view_distribution(credit_cards, kmeans):
     plt.scatter(credit_cards['age'], credit_cards['ps'], c=kmeans.labels_, s=20)
     plt.scatter(credit_cards['limit'], credit_cards['ps'], c=kmeans.labels_, s=20)
     
+    credit_cards["Label"] = kmeans.labels_
+    
     plot_histogram(credit_cards, "age")
     plot_histogram(credit_cards, "ps")
     plot_histogram(credit_cards, "limit")
