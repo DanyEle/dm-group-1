@@ -166,44 +166,36 @@ def run_deep_classification_algs():
     graph = pydotplus.graph_from_dot_data(dot_data)  
     Image(graph.create_png())
         
-    model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
+    
+   # model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
     
     
     ##OPTIMIZE BY GRID SEARCH
 
     #let's try tuning the hyperparameters by grid search
-    param_list_grid = {'min_samples_split': [2, 5, 10, 20],
-                  'min_samples_leaf': [1, 5, 10, 20],
+    param_list_grid = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
+                  'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
+                  'max_depth': [None] + list(np.arange(2, 100)), #previously, not considered this. 
                  }
 
-    
     dec_tree_optimized_grid = optimize_model(dec_tree, 1, param_list_grid, X, y)
     model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
     
     ##OPTIMIZE BY RANDOMIZED SEARCH
-    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 20)),
-              'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
-              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
+    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 100)),
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100, 150, 200],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100, 150, 200],
              }
-     
-    dec_tree_optimized_grid.classes_ = ["no", "yes"]
-    
-    
-    dot_data = tree.export_graphviz(dec_tree_optimized_grid, out_file=None,  
-                                feature_names=attributes, 
-                                class_names=dec_tree_optimized_grid.classes_,  
-                                filled=True, rounded=True,  
-                                special_characters=True)  
-    graph = pydotplus.graph_from_dot_data(dot_data)  
-    Image(graph.create_png())
-    
-    
-    
-    ##OPTIMIZE BY RAND SEARCH   
     
     dec_tree_rand_search = optimize_model(dec_tree, 2, param_list_rand_search, X, y)   
     model_compute_test_validation_accuracy(dec_tree_rand_search, X_test, y_test)
     dec_tree_rand_search.classes_ = ["no", "yes"]
+    
+     #actually apply the model   . F-Score of 0.81716
+    output_model_results_to_file(dec_tree_rand_search, "group_1_submission_15_dec_rand_search.txt", credit_cards_deep_learning_test, None)
+
+    
+    
 
     ##let's visualize the tree
     dot_data = tree.export_graphviz(dec_tree_rand_search, out_file=None,  
@@ -214,6 +206,10 @@ def run_deep_classification_algs():
     graph = pydotplus.graph_from_dot_data(dot_data)  
     Image(graph.create_png())
         
+    for col, imp in zip(attributes, dec_tree_rand_search.feature_importances_):
+        print(col, imp)
+        
+    
 
     #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
     
