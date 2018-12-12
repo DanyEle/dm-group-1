@@ -5,19 +5,6 @@ import sys
 import os
 
 
-#os.chdir('/home/daniele/dm-group-1/Code/Daniele')
-
-#dependencies on Riccardo's remove missing values function
-#sys.path.insert(0, './../Riccardo')
-#from MissingValues_3 import remove_missing_values
-
-#dependencies on Gemma's remove outliers function
-#sys.path.insert(0, './../Gemma/Part 1')
-#from outliers import removeOutliers
-
-#dependencies on Maddalena's formula to correct ps values
-#sys.path.insert(0, './../Maddalena')
-#from formula_1_2_correction import correct_ps_values
 
 
 #imports for k-means
@@ -30,6 +17,24 @@ from dependencies import *
 
 
 def run_daniele_k_means_certain_attributes():
+    
+    os.chdir('/home/daniele/dm-group-1/Code/Daniele')
+
+    #dependencies on Riccardo's remove missing values function
+    sys.path.insert(0, './../Riccardo')
+    from MissingValues_3 import remove_missing_values
+    
+    #dependencies on Gemma's remove outliers function
+    sys.path.insert(0, './../Gemma/Part 1')
+    from outliers import removeOutliers
+    
+    #dependencies on Maddalena's formula to correct ps values
+    sys.path.insert(0, './../Maddalena')
+    from formula_1_2_correction import correct_ps_values
+
+    
+    
+    
     #load dataset into a dataframe
     credit_cards = pd.read_csv("./../../Dataset/credit_default_train.csv")
 

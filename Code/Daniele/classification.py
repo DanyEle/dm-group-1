@@ -17,8 +17,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 from sklearn.metrics import roc_curve, auc, roc_auc_score
-
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import cross_val_score
+from sklearn.naive_bayes import GaussianNB
+
+from sklearn import svm
+
 
 
 import seaborn as sns
@@ -43,29 +47,29 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 
 
-os.chdir('/home/daniele/dm-group-1/Code/Daniele')
-
-
-#import Gemma's function for removing outliers
-sys.path.insert(0, './../Gemma/Part 1')
-from outliers import removeOutliers
-
-#import Riccardo's function for removing missing values
-sys.path.insert(0, './../Riccardo')
-from MissingValues_3 import remove_missing_values
-
-#import Daniele's function for converting education into a numerical attribute
-#import also Daniele's function for adding mean columns' value to the data frame
-from dependencies import create_data_frame_avg
-
-sys.path.insert(0, './../Maddalena')
-from formula_1_2_correction import correct_ps_values
-
-
 
 def run_deep_classification_algs():
     
     """INITIALIZE INPUT DATA"""
+    
+    os.chdir('/home/daniele/dm-group-1/Code/Daniele')
+
+
+    #import Gemma's function for removing outliers
+    sys.path.insert(0, './../Gemma/Part 1')
+    from outliers import removeOutliers
+    
+    #import Riccardo's function for removing missing values
+    sys.path.insert(0, './../Riccardo')
+    from MissingValues_3 import remove_missing_values
+    
+    #import Daniele's function for converting education into a numerical attribute
+    #import also Daniele's function for adding mean columns' value to the data frame
+    from dependencies import create_data_frame_avg
+    
+    sys.path.insert(0, './../Maddalena')
+    from formula_1_2_correction import correct_ps_values
+    
     
     
     #initialize data frame with the attributes we wanna consider
@@ -111,16 +115,15 @@ def run_deep_classification_algs():
     
     """Model 1 - One hidden layer"""
     #First model try: 1 single hidden layer with 14 hidden nodes. 
-    model_1 = Sequential ([ Dense(4, input_shape=(5,), activation="relu"), Dense(1, activation="sigmoid")])
+    model_1 = Sequential ([ Dense(4, input_shape=(23,), activation="relu"), Dense(1, activation="sigmoid")])
     
     model_1.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
     
-    #Acc = 0.8225. Val_Acc = 0.8260
-    run_hist_1 = model_1.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=200)
+    #Acc = 0.8238. Val_Acc = 0.8290
+    run_hist_1 = model_1.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=500)
     plot_model_train_validation_loss(run_hist_1)
     
-    #output_model_results_to_file(model_1, "group_1_submission_7_DL_M1.txt", credit_cards_deep_learning_test, None)
-    
+    output_model_results_to_file(model_1, "group_1_submission_17_DL_1_Node.txt", credit_cards_deep_learning_test, None)
     
     
     """Model 2 - three hidden layers"""
@@ -128,9 +131,12 @@ def run_deep_classification_algs():
     #probably overfitting
     model_2 = Sequential([
         #3 hidden layers with 14 neurons in each one
-        Dense(14, input_shape=(21,), activation="relu"),
+        Dense(14, input_shape=(23,), activation="relu"),
         Dense(14, activation="relu"),
         Dense(14, activation="relu"),
+        Dense(14, activation="relu"),
+
+
         #final layer
         Dense(1, activation="sigmoid")
     ])
@@ -138,10 +144,12 @@ def run_deep_classification_algs():
     #0.723 on the test dataset :(
     model_2.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
         
-    run_hist_2 = model_2.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=1500)
-    plot_model_train_validation_loss(run_hist_1)
+    run_hist_2 = model_2.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=200)
+    plot_model_train_validation_loss(run_hist_2)
     
-    output_model_results_to_file(model_1, "group_1_submission_8_DL_M2.txt", credit_cards_deep_learning_test, None)
+    
+    
+    output_model_results_to_file(model_2, "group_1_submission_18_DL_M3.txt", credit_cards_deep_learning_test, None)
 
 
     """DECISION TREES"""
@@ -193,10 +201,7 @@ def run_deep_classification_algs():
     
      #actually apply the model   . F-Score of 0.81716
     output_model_results_to_file(dec_tree_rand_search, "group_1_submission_15_dec_rand_search.txt", credit_cards_deep_learning_test, None)
-
     
-    
-
     ##let's visualize the tree
     dot_data = tree.export_graphviz(dec_tree_rand_search, out_file=None,  
                                 feature_names=attributes, 
@@ -210,9 +215,7 @@ def run_deep_classification_algs():
         print(col, imp)
         
     
-
     #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
-    
     
     """RANDOM FOREST"""
     
@@ -230,8 +233,10 @@ def run_deep_classification_algs():
     #let's try finding best parameters for random forest
     
       #let's try tuning the hyperparameters by grid search
-    param_list_grid = {'min_samples_split': [2, 5, 10, 20],
-                  'min_samples_leaf': [1, 5, 10, 20],
+    param_list_grid = {
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100, 150, 200],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100, 150, 200],
+              'max_depth': [None] + list(np.arange(2, 50)),
                  }
     
     #F1-score = 0.86; accuracy; 0.873; roc-auc: 0.953;
@@ -239,30 +244,58 @@ def run_deep_classification_algs():
     #FULL DATASET, no status and sex - F1 score= 0.81, accuracy = 0.0828, roc-auc = 0.888
     #FULL DATASET, status and sex - F1 score = 0.86. accuracy = 0.876. roc-auc = 0.970
     rf_model_optimized_grid = optimize_model(rf_model, 1, param_list_grid, X, y)
-
     model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
     
-    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_14_RF_grid_full.txt", credit_cards_deep_learning_test, None)
+    
+    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_18_RF_grid.txt", credit_cards_deep_learning_test, None)
         
-
-    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 50)),
+  
+    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 100)),
               'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
               'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
              }
-    
+
     #F1-score= 0.91; accuracy = 0.917; roc-auc = 0.982
     clf_optimized_rand_search = optimize_model(rf_model, 2, param_list_rand_search, X, y)
-    
+        
+    #
     model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
     
-    output_model_results_to_file(clf_optimized_rand_search, "group_1_submission_11_rand_search.txt", credit_cards_deep_learning_test, None)
-    
-    import pickle
-    pickle.dump(clf_optimized_rand_search, open('rf_model_optimized.p', 'wb'))
-    
+    output_model_results_to_file(clf_optimized_rand_search, "group_1_submission_19_rand_search.txt", credit_cards_deep_learning_test, None)
         
     
+    scores = cross_val_score(rf_model, X, y, cv=50)
     
+    print('RF Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+    
+    scores = cross_val_score(rf_model, X, y, cv=50, scoring='f1_macro')
+    print('RF Accuracy .F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+
+    
+    """ K - NEAREST NEIGHBORS """
+    """ KNN by Cross-validaiton """ #pretty poor performance
+
+    
+    for i in range(1, 100):
+        clf = KNeighborsClassifier(n_neighbors=i)
+        
+        scores = cross_val_score(clf, X, y, cv=10)
+        
+        print('KNN k =' + str(i) + 'Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+    
+        scores = cross_val_score(clf, X, y, cv=10, scoring='f1_macro')
+        print('KNN k =' + str(i) + 'F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+
+
+    
+    """Naive Bayes"""
+    
+    model = GaussianNB()
+
+# Train the model using the training sets 
+    model.fit(X_test, y_test)
+    
+    model_compute_test_validation_accuracy(model, X_test, y_test)
 
     
     

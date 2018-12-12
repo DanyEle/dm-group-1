@@ -4,20 +4,20 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-#os.chdir('/home/daniele/dm-group-1/Code/Daniele')
+os.chdir('/home/daniele/dm-group-1/Code/Daniele')
 
 
 #dependencies on Riccardo's remove missing values function
-#sys.path.insert(0, './../Riccardo')
-#from MissingValues_3 import remove_missing_values
+sys.path.insert(0, './../Riccardo')
+from MissingValues_3 import remove_missing_values
 
 #dependencies on Gemma's remove outliers function
-#sys.path.insert(0, './../Gemma/Part 1')
-#from outliers import removeOutliers
+sys.path.insert(0, './../Gemma/Part 1')
+from outliers import removeOutliers
 
 #dependencies on Maddalena's formula to correct ps values
-#sys.path.insert(0, './../Maddalena')
-#from formula_1_2_correction import correct_ps_values
+sys.path.insert(0, './../Maddalena')
+from formula_1_2_correction import correct_ps_values
 
 
 
@@ -306,7 +306,7 @@ def plot_histogram_per_attribute(credit_cards_avg, size):
 
 def plot_count_per_discrete_attribute(credit_cards_avg, size):
     # Set up a grid of plots
-    fig = plt.figure(figsize=(size, size)) 
+    fig = plt.figure(figsize=(size, sizcreate_data_frame_avge)) 
     fig_dims = (2, 2)
     
     df = credit_cards_avg
