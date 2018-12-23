@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_auc_score, roc_curve, accuracy_score
+from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_auc_score, roc_curve, accuracy_score, precision_score, f1_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedShuffleSplit
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, f1_score, classification_report
@@ -20,6 +21,10 @@ from sklearn.metrics import roc_curve, auc, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import cross_val_score
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+from keras.callbacks import Callback
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
+
 
 from sklearn import svm
 
@@ -115,7 +120,7 @@ def run_deep_classification_algs():
     
     """Model 1 - One hidden layer"""
     #First model try: 1 single hidden layer with 14 hidden nodes. 
-    model_1 = Sequential ([ Dense(4, input_shape=(23,), activation="relu"), Dense(1, activation="sigmoid")])
+    model_1 = Sequential ([ Dense(20, input_shape=(23,), activation="relu"), Dense(1, activation="sigmoid")])
     
     model_1.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
     
@@ -123,23 +128,19 @@ def run_deep_classification_algs():
     run_hist_1 = model_1.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=500)
     plot_model_train_validation_loss(run_hist_1)
     
-    output_model_results_to_file(model_1, "group_1_submission_17_DL_1_Node.txt", credit_cards_deep_learning_test, None)
+    output_model_results_to_file(model_1, "group_1_submission_26_DL_1_Node.txt", credit_cards_deep_learning_test, None)
     
     
-    """Model 2 - three hidden layers"""
+    """Model 2 - two hidden layers"""
     
     #probably overfitting
     model_2 = Sequential([
         #3 hidden layers with 14 neurons in each one
-        Dense(14, input_shape=(23,), activation="relu"),
-        Dense(14, activation="relu"),
-        Dense(14, activation="relu"),
-        Dense(14, activation="relu"),
-
-
+        Dense(20, input_shape=(23,), activation="relu"),
+        Dense(10, activation="relu"),
         #final layer
-        Dense(1, activation="sigmoid")
-    ])
+        Dense(1, activation="sigmoid"),
+    ])  
     
     #0.723 on the test dataset :(
     model_2.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
@@ -147,9 +148,11 @@ def run_deep_classification_algs():
     run_hist_2 = model_2.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=200)
     plot_model_train_validation_loss(run_hist_2)
     
+    #we should test on non-normalized data because the validation dataset on Kaggle is also unnormalized
+    model_compute_test_validation_accuracy(model_2, X_test, y_test)
     
-    
-    output_model_results_to_file(model_2, "group_1_submission_18_DL_M3.txt", credit_cards_deep_learning_test, None)
+    output_model_results_to_file(model_2, "group_1_submission_24_DL_M2.txt", credit_cards_deep_learning_test, None)   
+
 
 
     """DECISION TREES"""
@@ -163,9 +166,11 @@ def run_deep_classification_algs():
     for col, imp in zip(attributes, dec_tree.feature_importances_):
         print(col, imp)
         
-    #we need to convert the decision tree's classes into labels again
+    #we need to convert the decision tree's classes into labels again    
+    model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
+    
     dec_tree.classes_ = ["no", "yes"]
-        
+    
     dot_data = tree.export_graphviz(dec_tree, out_file=None,  
                                 feature_names=attributes, 
                                 class_names=dec_tree.classes_,  
@@ -175,15 +180,13 @@ def run_deep_classification_algs():
     Image(graph.create_png())
         
     
-   # model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
-    
     
     ##OPTIMIZE BY GRID SEARCH
 
     #let's try tuning the hyperparameters by grid search
     param_list_grid = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
                   'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
-                  'max_depth': [None] + list(np.arange(2, 100)), #previously, not considered this. 
+                  'max_depth': [None] + list(np.arange(2, 5)), #previously, not considered this. 
                  }
 
     dec_tree_optimized_grid = optimize_model(dec_tree, 1, param_list_grid, X, y)
@@ -197,6 +200,8 @@ def run_deep_classification_algs():
     
     dec_tree_rand_search = optimize_model(dec_tree, 2, param_list_rand_search, X, y)   
     model_compute_test_validation_accuracy(dec_tree_rand_search, X_test, y_test)
+    
+    
     dec_tree_rand_search.classes_ = ["no", "yes"]
     
      #actually apply the model   . F-Score of 0.81716
@@ -218,6 +223,8 @@ def run_deep_classification_algs():
     #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
     
     """RANDOM FOREST"""
+    
+    #let's try taking a balanced sample
     
     rf_model = RandomForestClassifier(n_estimators=200, 
                                  criterion='gini', 
@@ -270,21 +277,52 @@ def run_deep_classification_algs():
     
     scores = cross_val_score(rf_model, X, y, cv=50, scoring='f1_macro')
     print('RF Accuracy .F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+    
+        
+    
+
+    """ RANDOM FOREST WITH STRATIFIED SHUFFLE SPLIT"""
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=11111)
+    sss.get_n_splits(X, y)    
+        
+    split_sss = sss.split(X, y)
+    
+    X_train_index, y_train_index = next(split_sss)
+    
+    X_train = X[X_train_index]
+    
+    y_train = y[y_train_index]
+    
+    dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
+                             min_samples_split=2, min_samples_leaf=1)
+    
+    dec_tree.fit(X_train, y_train)
+
+    
+    
+    
+    
+    
+    
 
     
     """ K - NEAREST NEIGHBORS """
     """ KNN by Cross-validaiton """ #pretty poor performance
 
+    indexes_vector = []
+    accuracy_vector = []
+    f1_vector = []
     
     for i in range(1, 100):
         clf = KNeighborsClassifier(n_neighbors=i)
-        
+        indexes_vector.append(i)
         scores = cross_val_score(clf, X, y, cv=10)
-        
-        print('KNN k =' + str(i) + 'Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+        print('KNN k = ' + str(i) + 'Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+        accuracy_vector.append(scores.mean())
     
         scores = cross_val_score(clf, X, y, cv=10, scoring='f1_macro')
-        print('KNN k =' + str(i) + 'F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+        print('KNN k = ' + str(i) + 'F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+        f1_vector.append(scores.mean())
 
 
     
@@ -292,7 +330,7 @@ def run_deep_classification_algs():
     
     model = GaussianNB()
 
-# Train the model using the training sets 
+    # Train the model using the training sets 
     model.fit(X_test, y_test)
     
     model_compute_test_validation_accuracy(model, X_test, y_test)
@@ -373,11 +411,15 @@ def output_model_results_to_file(keras_model, file_name, credit_cards_deep_learn
     
     y_labels = keras_model.predict(X_data)
     
-    sys.stdout = open(file_name, 'w')
+    new_file = open(file_name, 'w')
     #just iterate over the two lists element by element and print them out
-    print("index,credit_default")
+    new_file.write("index,credit_default" + "\n")
     for i in range(0, len(y_labels)):
-        print(str(i) + "," + str(number_to_default(y_labels.item(i))))
+        new_file.write(str(i) + "," + str(number_to_default(y_labels.item(i))) + "\n")
+        
+    #done, now close the file and stop outputting to it
+    new_file.close()
+        
 
 
     
@@ -439,7 +481,8 @@ def convert_sex_status_to_numerical(df):
     label_encoders = dict()
     column2encode = ['sex', 'status']
     
-    for col in column2encode:
+    for col in column2encode:    
+
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col])
         label_encoders[col] = le
@@ -456,7 +499,9 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
     #firstly, remove missing values
     credit_cards_no_missing_outliers = remove_missing_values(credit_cards_df)
     
+    
     credit_cards_no_missing_outliers = convert_sex_status_to_numerical(credit_cards_no_missing_outliers)
+    
     
     #credit_cards_no_missing_outliers = correct_ps_values(credit_cards_df)
     
@@ -483,17 +528,6 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
         return(credit_cards_deep_learning)
 
 
-def plot_roc(y_test, y_pred, model_name):
-    fpr, tpr, thr = roc_curve(y_test, y_pred)
-    fig, ax = plt.subplots(figsize=(8, 8))
-    ax.plot(fpr, tpr, 'k-')
-    ax.plot([0, 1], [0, 1], 'k--', linewidth=.5)  # roc curve for random model
-    ax.grid(True)
-    ax.set(title='ROC Curve for {} on PIMA diabetes problem'.format(model_name),
-           xlim=[-0.01, 1.01], ylim=[-0.01, 1.01])
-
-
-
 
 def plot_model_train_validation_loss(keras_model):
        #plot accuracy of second deep learning model
@@ -515,6 +549,17 @@ def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
     #plot_roc(y_test, y_pred_prob, 'NN')
     
     print(classification_report(y_test, y_pred_class))
+    
+def convert_pred_prob_to_class(y_pred_prob):
+    y_pred_class = []
+    for class_0, class_1 in y_pred_prob:
+        #higher probability to be in class 0
+        if(class_0 >= class_1):
+            y_pred_class.append(0)
+        else:
+            y_pred_class.append(1)
+            
+    return(y_pred_class)
     
     
     
