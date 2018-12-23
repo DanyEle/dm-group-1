@@ -1,4 +1,14 @@
 Daniele Gadler.
 Nome account: DanyEle
 Email: daniele.gadler@yahoo.it
-Password:	  dani1995
+Password: dani1995
+
+Maddalena Amendola
+Nome Account: maddalenamendola 
+Email: maddalena_1995@hotmail.it
+Password: KaggleUnipi
+
+Riccardo Manetti
+Username: riccardomanetti
+Email: r.manetti2@campus.unimib.it
+Password: 06061996
