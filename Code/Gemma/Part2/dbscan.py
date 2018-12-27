@@ -151,18 +151,41 @@ def computeCorrelation(df, correlationPath):
 """
 
 
-def dbscan(dataFrame, eps, minpts, distance, short=None):
-    dataFrame = dataFrameManipulation(dataFrame)
-    if short:
-        dataFrame = dataFrame.drop(["ps-high", "ps-low"], axis=1)
+def dbscan(dataFrame, eps, minpts, distance, version):
+    if ((version == 0) or (version == 1)):
+        dataFrame = dataFrameManipulation(dataFrame)
+        if (
+                version == 1
+        ):  #Attributes: limit, age, education, ps-sep, ps-mode, ba_m, all pas
+            dataFrame = dataFrame.drop(["ps-high", "ps-low"], axis=1)
+    if (version == 2):  #Attributes: limit,ba_m, pa_m, ps_m
+        toDrop = [
+            "sex", "education", "status", "age", "ps-sep", "ps-aug", "ps-jul",
+            "ps-jun", "ps-may", "ps-apr", "ba-sep", "ba-aug", "ba-jul",
+            "ba-jun", "ba-may", "ba-apr", "pa-sep", "pa-aug", "pa-jul",
+            "pa-jun", "pa-may", "pa-apr", "credit_default", "ps_mode", "Lab"
+        ]
+        dataFrame = dataFrame.drop(toDrop, axis=1)
+    if (version == 3):  #Attributes: limit, all bas, all pas
+        toDrop = [
+            "sex", "education", "status", "age", "ps-sep", "ps-aug", "ps-jul",
+            "ps-jun", "ps-may", "ps-apr", "credit_default", "ps_mode", "ba_m",
+            "pa_m", "Lab", "ps_m"
+        ]
+        dataFrame = dataFrame.drop(toDrop, axis=1)
+    if (version == 4):  #Attributes: limit, all bas
+        toDrop = [
+            "sex", "education", "status", "age", "ps-sep", "ps-aug", "ps-jul",
+            "ps-jun", "ps-may", "ps-apr", "pa-sep", "pa-aug", "pa-jul",
+            "pa-jun", "pa-may", "pa-apr", "credit_default", "ps_mode", "ba_m",
+            "pa_m", "Lab", "ps_m"
+        ]
+        dataFrame = dataFrame.drop(toDrop, axis=1)
     scaler = MinMaxScaler()  #normalization
     print("Epsilon: " + str(eps) + " minPts: " + str(minpts))
     tenta = 0
     df1 = scaler.fit_transform(dataFrame.values)
-    if (distance == "minkowski"):  #Parameter p=1 for Manhattan distance
-        dbscan = DBSCAN(eps=eps, min_samples=minpts, metric=distance, p=1)
-    else:
-        dbscan = DBSCAN(eps=eps, min_samples=minpts, metric=distance, p=1)
+    dbscan = DBSCAN(eps=eps, min_samples=minpts, metric=distance, p=1)
     dbscan.fit(df1)
     numClusters = len(set(dbscan.labels_))
     if (numClusters == 1):
@@ -196,14 +219,14 @@ def EpsMinPtsEvaluation(eps,
                         minpts,
                         rootPath,
                         df2,
-                        short=None,
+                        version=None,
                         distance=None,
                         noAge=None):
     d = ({})  #dictionary to store clusterings
     for i in range(0, len(eps)):
         if (noAge):
             df2 = df2.drop(["age"], axis=1)
-        myDBscan, s, labels = dbscan(df2, eps[i], minpts[i], distance, short)
+        myDBscan, s, labels = dbscan(df2, eps[i], minpts[i], distance, version)
         d[eps[i]] = ({'Sil': s, 'Labels': labels})
         if (s == -2):
             continue
