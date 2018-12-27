@@ -1,7 +1,7 @@
-tabella.pdf: c1.txt tabella.tex
-	xelatex -shell-escape -pdf tabella.tex
-	rm tabella.aux
-	rm tabella.fdb_latexmk
-	rm tabella.fls
-	rm tabella.out
-	rm tabella.log
+tabellaNoPS.pdf: corrNoPS.txt tabellaNoPS.tex
+	xelatex -shell-escape -pdf tabellaNoPS.tex
+	rm tabellaNoPS.aux
+	rm tabellaNoPS.fdb_latexmk
+	rm tabellaNoPS.fls
+	rm tabellaNoPS.out
+	rm tabellaNoPS.log
