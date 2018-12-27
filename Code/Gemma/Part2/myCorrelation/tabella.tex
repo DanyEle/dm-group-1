@@ -1,0 +1,184 @@
+% chktex-file 44
+% chktex-file 17
+% chktex-file 36
+% chktex-file 13
+% chktex-file 15
+% chktex-file 29
+% chktex-file 40
+% chktex-file 1
+% chktex-file 8
+
+\documentclass[11pt,a4paper,english,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{caption}
+\usepackage{nopageno}
+\usepackage{version}
+\usepackage{babel}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage[svgnames, table]{xcolor}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{fullpage}
+\usepackage{dsfont}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\usepackage{eurosym}
+\usepackage{tikz}
+\usepackage{collcell}
+\usepackage{verbatim}
+\usepackage[T1]{fontenc}
+\usepackage{extarrows}
+\usepackage[numbers,sort]{natbib}
+\usepackage[shadow,color=green!40]{todonotes}
+\usepackage{cleveref}
+\usepackage[euler-digits]{eulervm}
+\usepackage{palatino}
+\usepackage{pifont}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{arydshln}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{siunitx}
+\pgfplotsset{compat=newest}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\sisetup{                           % setup siunitx ...
+        round-mode      = places,   % rounds numbers
+        round-precision = 2,        % to 3 places
+        per-mode        = symbol,   % kg/dm^3 instead kgm^{-3}
+      group-four-digits = true,     %   for 1 234,567       
+        }
+
+\pgfplotstableset{
+  font={\tiny},
+  color cells/.style={
+    col sep=space,
+    string type,
+    postproc cell content/.code={%
+   \pgfkeysalso{%
+        @cell content=\rule{0cm}{1.5ex}%
+        \pgfmathsetmacro\number{int(##1)}%
+        \pgfmathsetmacro\alargenumber{int(add(abs(\number), 50))}
+        \pgfmathsetmacro\anumber{int(abs(multiply(\number, 4)))}
+        \ifnum\number>0\edef\setcolor{\noexpand\cellcolor{green!\number}}\setcolor
+        \else\ifnum\number<1\edef\setcolor{\noexpand\cellcolor{green!\number!red!25}}\setcolor\fi%        
+        \fi%
+        \ifnum\number<0\edef\setcolor{\noexpand\cellcolor{red!\alargenumber}}\setcolor\fi%
+        ##1}%
+    },
+      display columns/0/.style={
+        column name=\bf limit,
+        column type ={l} 
+      },
+      display columns/1/.style={
+		    column name=\bf age,
+		    column type = {l}
+      },
+      display columns/2/.style={
+		    column name=\bf education,
+		    column type = {l}
+      },
+      display columns/3/.style={
+        column name=\bf ps-sep,
+		    column type = {l}
+      }, 
+      display columns/4/.style={
+        column name=\bf ps-high,
+        column type = {l}
+      }, 
+      display columns/5/.style={
+        column name=\bf ps-low,
+		    column type = {l}
+      },
+      display columns/6/.style={
+        column name=\bf ps-mode,
+        column type = {l}
+      },
+      display columns/7/.style={
+        column name=\bf ba,
+        column type = {l}
+      },
+      display columns/8/.style={
+        column name=\bf pa-sep,
+        column type = {l}
+      },
+      display columns/9/.style={
+        column name=\bf pa-aug,
+        column type = {l}
+      },
+      display columns/10/.style={
+        column name=\bf pa-jul,
+        column type = {l}
+      },
+      display columns/11/.style={
+        column name=\bf pa-jun,
+        column type = {l}
+      },
+      display columns/12/.style={
+        column name=\bf pa-may,
+        column type = {l}
+      },
+      display columns/13/.style={
+        column name=\bf pa-apr,
+        column type = {l|}
+      }
+    }
+  }
+
+
+
+\newcommand{\addCorrTable}[2]{
+\begin{table}
+%  \centering
+    \tiny
+       \begin{tabular}{|l|}
+            \hline
+            \\
+            \hline
+            \bf limit \\
+            \bf age \\
+            \bf education \\
+            
+            \bf ps-sep \\
+            \bf ps-high\\
+            \bf ps-low\\
+            \bf ps-mode\\
+            
+            \bf ba \\
+
+            \bf pa-sep \\
+            \bf pa-aug \\
+            \bf pa-jul \\
+            \bf pa-jun \\
+            \bf pa-may \\
+            \bf pa-apr \\
+            \hline
+      \end{tabular}%
+    \pgfplotstabletypeset[
+      color cells,
+      every head row/.style={
+		    before row={\hline}, % have a rule at top
+        after row={\hline},
+		  },
+		  every last row/.style={after row=\hline}, % rule at bottom
+      every last column/.style={column type/.add={}{|}},
+    ]{#1}
+  \caption{#2}
+\end{table} 
+}
+
+\begin{document}
+
+\addCorrTable{../correlation.txt}{Correlation Matrix of the numerical attributes in the dataset}
+
+\end{document}
+

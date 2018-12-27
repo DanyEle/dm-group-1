@@ -1,0 +1,141 @@
+The best  20 clusters are:
+~~~~~~~~~~~~~~ 1 ~~~~~~~~~~~~~~~~~
+Distance:  cityblock
+Version:  1
+Eps:  0.65
+numTrueClusters:  3
+numNoisePts:  75
+Silhouette:  0.43704722566089876
+~~~~~~~~~~~~~~ 2 ~~~~~~~~~~~~~~~~~
+Distance:  cityblock
+Version:  0
+Eps:  0.7
+numTrueClusters:  3
+numNoisePts:  110
+Silhouette:  0.2903597708248968
+~~~~~~~~~~~~~~ 3 ~~~~~~~~~~~~~~~~~
+Distance:  cosine
+Version:  0
+Eps:  0.05
+numTrueClusters:  4
+numNoisePts:  72
+Silhouette:  0.265758801855314
+~~~~~~~~~~~~~~ 4 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  1
+Eps:  0.32
+numTrueClusters:  4
+numNoisePts:  147
+Silhouette:  0.25283402278170886
+~~~~~~~~~~~~~~ 5 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  1
+Eps:  0.3
+numTrueClusters:  5
+numNoisePts:  149
+Silhouette:  0.2510828109574747
+~~~~~~~~~~~~~~ 6 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  1
+Eps:  0.28
+numTrueClusters:  9
+numNoisePts:  140
+Silhouette:  0.24988455902265427
+~~~~~~~~~~~~~~ 7 ~~~~~~~~~~~~~~~~~
+Distance:  minkowski
+Version:  0
+Eps:  0.33
+numTrueClusters:  5
+numNoisePts:  568
+Silhouette:  0.24159821581308083
+~~~~~~~~~~~~~~ 8 ~~~~~~~~~~~~~~~~~
+Distance:  minkowski
+Version:  0
+Eps:  0.3
+numTrueClusters:  6
+numNoisePts:  618
+Silhouette:  0.2380445677210483
+~~~~~~~~~~~~~~ 9 ~~~~~~~~~~~~~~~~~
+Distance:  cosine
+Version:  1
+Eps:  0.04
+numTrueClusters:  8
+numNoisePts:  62
+Silhouette:  0.21867381406657294
+~~~~~~~~~~~~~~ 10 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  1
+Eps:  0.25
+numTrueClusters:  25
+numNoisePts:  155
+Silhouette:  0.20692144854549613
+~~~~~~~~~~~~~~ 11 ~~~~~~~~~~~~~~~~~
+Distance:  minkowski
+Version:  0
+Eps:  0.35
+numTrueClusters:  2
+numNoisePts:  941
+Silhouette:  0.1995937648638791
+~~~~~~~~~~~~~~ 12 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  0
+Eps:  0.32
+numTrueClusters:  4
+numNoisePts:  212
+Silhouette:  0.1797705978817189
+~~~~~~~~~~~~~~ 13 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  0
+Eps:  0.28
+numTrueClusters:  8
+numNoisePts:  227
+Silhouette:  0.1774937943323731
+~~~~~~~~~~~~~~ 14 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  0
+Eps:  0.3
+numTrueClusters:  5
+numNoisePts:  215
+Silhouette:  0.17712846450129588
+~~~~~~~~~~~~~~ 15 ~~~~~~~~~~~~~~~~~
+Distance:  minkowski
+Version:  0
+Eps:  0.33
+numTrueClusters:  8
+numNoisePts:  889
+Silhouette:  0.13373798870096873
+~~~~~~~~~~~~~~ 16 ~~~~~~~~~~~~~~~~~
+Distance:  cityblock
+Version:  0
+Eps:  0.65
+numTrueClusters:  12
+numNoisePts:  118
+Silhouette:  0.12968340618910912
+~~~~~~~~~~~~~~ 17 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  0
+Eps:  0.25
+numTrueClusters:  29
+numNoisePts:  256
+Silhouette:  0.08797533604870297
+~~~~~~~~~~~~~~ 18 ~~~~~~~~~~~~~~~~~
+Distance:  minkowski
+Version:  1
+Eps:  0.3
+numTrueClusters:  16
+numNoisePts:  934
+Silhouette:  0.07841952821197347
+~~~~~~~~~~~~~~ 19 ~~~~~~~~~~~~~~~~~
+Distance:  euclidean
+Version:  0
+Eps:  0.23
+numTrueClusters:  220
+numNoisePts:  0
+Silhouette:  0.060701115119748704
+~~~~~~~~~~~~~~ 20 ~~~~~~~~~~~~~~~~~
+Distance:  cosine
+Version:  0
+Eps:  0.04
+numTrueClusters:  16
+numNoisePts:  92
+Silhouette:  0.049263899476725034
