@@ -129,9 +129,7 @@ def run_deep_classification_algs():
     plot_model_train_validation_loss(run_hist_1)
     
     model_compute_test_validation_accuracy_DL(model_1, X_train, y_train)
-
     model_compute_test_validation_accuracy_DL(model_1, X_test, y_test)
-    
     
     #output_model_results_to_file(model_1, "group_1_submission_26_DL_1_Node.txt", credit_cards_deep_learning_test, None)
     
@@ -164,7 +162,7 @@ def run_deep_classification_algs():
     #output_model_results_to_file(model_2, "group_1_submission_24_DL_M2.txt", credit_cards_deep_learning_test, None)   
 
 
-    """DECISION TREES"""
+    """DECISION TREES - SDT"""
     
     dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
                              min_samples_split=2, min_samples_leaf=1)
@@ -173,11 +171,11 @@ def run_deep_classification_algs():
 
     #let's visualize feature importance
     for col, imp in zip(attributes, dec_tree.feature_importances_):
-        print(col, imp)
-        
+        print(col, imp)   
     #we need to convert the decision tree's classes into labels again    
     model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
-    
+    model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
+
     dec_tree.classes_ = ["no", "yes"]
     
     dot_data = tree.export_graphviz(dec_tree, out_file=None,  
@@ -188,6 +186,40 @@ def run_deep_classification_algs():
     graph = pydotplus.graph_from_dot_data(dot_data)  
     Image(graph.create_png())
         
+      #Stratifled shuffle split with decision trees
+    """ SDT WITH STRATIFIED SHUFFLE SPLIT"""
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+    sss.get_n_splits(X, y)    
+    
+    i = 1
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+    
+        dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
+                             min_samples_split=2, min_samples_leaf=1)
+        
+        dec_tree.fit(X_train, y_train) 
+        
+        print("i = " + str(i))
+        model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
+        model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
+
+        i = i + 1
+        
+    """ SDT with oversampling"""
+        
+    ros = RandomOverSampler(random_state=42)
+    X_res, y_res = ros.fit_resample(X, y)
+    
+    dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
+                             min_samples_split=2, min_samples_leaf=1)
+    
+    dec_tree.fit(X_res, y_res)
+    
+    model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
+    model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
+    
     
     
     ##OPTIMIZE BY GRID SEARCH
@@ -229,32 +261,6 @@ def run_deep_classification_algs():
         print(col, imp)
         
         
-    #Stratifled shuffle split with decision trees
-    """ SDT WITH STRATIFIED SHUFFLE SPLIT"""
-    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
-    sss.get_n_splits(X, y)    
-    split_sss = sss.split(X, y)
-    
-    i = 1
-    for train_index, test_index in sss.split(X, y):
-        X_train, X_test = X[train_index], X[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-    
-        dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
-                             min_samples_split=2, min_samples_leaf=1)
-        
-        dec_tree.fit(X_train_sss, y_train_sss) 
-        
-        print("i = " + str(i))
-        model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
-        model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
-
-        i = i + 1
-        
-    """ SDT with oversampling"""
-        
-    ros = RandomOverSampler(random_state=42)
-    X_res, y_res = ros.fit_resample(X, y)
 
         
     
@@ -336,7 +342,6 @@ def run_deep_classification_algs():
         print('KNN k = ' + str(i) + 'F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
         f1_vector.append(scores.mean())
 
-
     
     """Naive Bayes"""
     
@@ -348,21 +353,6 @@ def run_deep_classification_algs():
     model_compute_test_validation_accuracy(model, X_test, y_test)
 
     
-    
-def test_range(low_range, hi_range):
-    X_train_small = X_train_sss[low_range:hi_range]
-    y_train_small = y_train_sss[low_range:hi_range]
-    
-    
-    dec_tree.fit(X_train_small, y_train_small)   
-    
-    
-def output_rows_to_file(X_train_small):
-    i = 100
-    for row in X_train_small:
-        new_file.write("[" + str(i) + "]" + "\n")
-        new_file.write(str(row) + "\n")
-        i = i + 1
     
 def inspect_training_set_for_na_infinite_values(X_train_sss):
     
@@ -382,26 +372,6 @@ def inspect_training_set_for_na_infinite_values(X_train_sss):
     
         
 
-def _assert_all_finite(X, allow_nan=False):
-    """Like assert_all_finite, but only for ndarray."""
-    X = np.asanyarray(X)
-    # First try an O(n) time, O(1) space solution for the common case that
-    # everything is finite; fall back to O(n) space np.isfinite to prevent
-    # false positives from overflow in sum method.
-    is_float = X.dtype.kind in 'fc'
-    if is_float and np.isfinite(X.sum()):
-        pass
-    elif is_float:
-        msg_err = "Input contains {} or a value too large for {!r}."
-        if (allow_nan and np.isinf(X).any() or
-                not allow_nan and not np.isfinite(X).all()):
-            type_err = 'infinity' if allow_nan else 'NaN, infinity'
-            raise ValueError(msg_err.format(type_err, X.dtype))
-
-        
-        
-    
-    
 def load_all_labels():
     #some random experiments
     
@@ -611,10 +581,9 @@ def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
     y_pred_class = convert_float_array_to_int_array(y_pred_class)
 
     # Print model performance and plot the roc curve
-    print('Accuracy on test dataset is {:.3f}'.format(accuracy_score(y_test,y_pred_class)))
+    print('Accuracy is {:.3f}'.format(accuracy_score(y_test,y_pred_class)))
     print('roc-auc is {:.3f}'.format(roc_auc_score(y_test,y_pred_prob[:,1])))
     #plot_roc(y_test, y_pred_prob, 'NN')
-    
     print(classification_report(y_test, y_pred_class))
     
 
