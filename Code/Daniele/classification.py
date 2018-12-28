@@ -24,7 +24,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from keras.callbacks import Callback
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
-
+from imblearn.over_sampling import RandomOverSampler
 
 from sklearn import svm
 
@@ -118,7 +118,7 @@ def run_deep_classification_algs():
     X_test_norm = normalizer.transform(X_test)
         
     
-    """Model 1 - One hidden layer"""
+    """DL Model 1 - One hidden layer"""
     #First model try: 1 single hidden layer with 14 hidden nodes. 
     model_1 = Sequential ([ Dense(20, input_shape=(23,), activation="relu"), Dense(1, activation="sigmoid")])
     
@@ -128,10 +128,15 @@ def run_deep_classification_algs():
     run_hist_1 = model_1.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=500)
     plot_model_train_validation_loss(run_hist_1)
     
-    output_model_results_to_file(model_1, "group_1_submission_26_DL_1_Node.txt", credit_cards_deep_learning_test, None)
+    model_compute_test_validation_accuracy_DL(model_1, X_train, y_train)
+
+    model_compute_test_validation_accuracy_DL(model_1, X_test, y_test)
     
     
-    """Model 2 - two hidden layers"""
+    #output_model_results_to_file(model_1, "group_1_submission_26_DL_1_Node.txt", credit_cards_deep_learning_test, None)
+    
+    
+    """DL Model 2 - two hidden layers"""
     
     #probably overfitting
     model_2 = Sequential([
@@ -149,10 +154,14 @@ def run_deep_classification_algs():
     plot_model_train_validation_loss(run_hist_2)
     
     #we should test on non-normalized data because the validation dataset on Kaggle is also unnormalized
-    model_compute_test_validation_accuracy(model_2, X_test, y_test)
     
-    output_model_results_to_file(model_2, "group_1_submission_24_DL_M2.txt", credit_cards_deep_learning_test, None)   
-
+    #validation on the training dataset
+    model_compute_test_validation_accuracy_DL(model_2, X_train, y_train)
+    
+    #validation on the test dataset
+    model_compute_test_validation_accuracy_DL(model_2, X_test, y_test)
+    
+    #output_model_results_to_file(model_2, "group_1_submission_24_DL_M2.txt", credit_cards_deep_learning_test, None)   
 
 
     """DECISION TREES"""
@@ -219,6 +228,35 @@ def run_deep_classification_algs():
     for col, imp in zip(attributes, dec_tree_rand_search.feature_importances_):
         print(col, imp)
         
+        
+    #Stratifled shuffle split with decision trees
+    """ SDT WITH STRATIFIED SHUFFLE SPLIT"""
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+    sss.get_n_splits(X, y)    
+    split_sss = sss.split(X, y)
+    
+    i = 1
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+    
+        dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
+                             min_samples_split=2, min_samples_leaf=1)
+        
+        dec_tree.fit(X_train_sss, y_train_sss) 
+        
+        print("i = " + str(i))
+        model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
+        model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
+
+        i = i + 1
+        
+    """ SDT with oversampling"""
+        
+    ros = RandomOverSampler(random_state=42)
+    X_res, y_res = ros.fit_resample(X, y)
+
+        
     
     #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
     
@@ -276,33 +314,7 @@ def run_deep_classification_algs():
     print('RF Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
     
     scores = cross_val_score(rf_model, X, y, cv=50, scoring='f1_macro')
-    print('RF Accuracy .F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
-    
-        
-    
-
-    """ RANDOM FOREST WITH STRATIFIED SHUFFLE SPLIT"""
-    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=11111)
-    sss.get_n_splits(X, y)    
-        
-    split_sss = sss.split(X, y)
-    
-    X_train_index, y_train_index = next(split_sss)
-    
-    X_train = X[X_train_index]
-    
-    y_train = y[y_train_index]
-    
-    dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
-                             min_samples_split=2, min_samples_leaf=1)
-    
-    dec_tree.fit(X_train, y_train)
-
-    
-    
-    
-    
-    
+    print('RF Accuracy .F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))   
     
 
     
@@ -337,6 +349,57 @@ def run_deep_classification_algs():
 
     
     
+def test_range(low_range, hi_range):
+    X_train_small = X_train_sss[low_range:hi_range]
+    y_train_small = y_train_sss[low_range:hi_range]
+    
+    
+    dec_tree.fit(X_train_small, y_train_small)   
+    
+    
+def output_rows_to_file(X_train_small):
+    i = 100
+    for row in X_train_small:
+        new_file.write("[" + str(i) + "]" + "\n")
+        new_file.write(str(row) + "\n")
+        i = i + 1
+    
+def inspect_training_set_for_na_infinite_values(X_train_sss):
+    
+    i = 0
+    for row in X_train_sss:
+        if not all(np.isfinite(row)):
+            print("Row " + i + " is infinite")
+            
+        if any(np.isnan(row)):
+            print("Row " + i + " does not have any NAs")
+        i = i + 1
+        
+        if np.isinf(row).any():
+            print("Row " + i + " is infinite")
+            
+                
+    
+        
+
+def _assert_all_finite(X, allow_nan=False):
+    """Like assert_all_finite, but only for ndarray."""
+    X = np.asanyarray(X)
+    # First try an O(n) time, O(1) space solution for the common case that
+    # everything is finite; fall back to O(n) space np.isfinite to prevent
+    # false positives from overflow in sum method.
+    is_float = X.dtype.kind in 'fc'
+    if is_float and np.isfinite(X.sum()):
+        pass
+    elif is_float:
+        msg_err = "Input contains {} or a value too large for {!r}."
+        if (allow_nan and np.isinf(X).any() or
+                not allow_nan and not np.isfinite(X).all()):
+            type_err = 'infinity' if allow_nan else 'NaN, infinity'
+            raise ValueError(msg_err.format(type_err, X.dtype))
+
+        
+        
     
     
 def load_all_labels():
@@ -499,9 +562,7 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
     #firstly, remove missing values
     credit_cards_no_missing_outliers = remove_missing_values(credit_cards_df)
     
-    
     credit_cards_no_missing_outliers = convert_sex_status_to_numerical(credit_cards_no_missing_outliers)
-    
     
     #credit_cards_no_missing_outliers = correct_ps_values(credit_cards_df)
     
@@ -510,6 +571,9 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
         removeOutliers(credit_cards_no_missing_outliers)
         #pass
         
+    #BUG FIXED: also need to re-adjust the indexes after removing outliers
+    credit_cards_no_missing_outliers.index = np.arange(0, len(credit_cards_no_missing_outliers))
+
     #create mean value columns
     credit_cards_avg = create_data_frame_avg(credit_cards_no_missing_outliers, ["ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep"], ["pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"],  ["ps-apr", "ps-may", "ps-jun", "ps-jul", "ps-aug", "ps-sep"])
 
@@ -521,6 +585,7 @@ def load_pre_process_dataset(url, train_dataset, attributes_deep_learning):
         credit_cards_default_num = credit_cards_edu_numerical
     #pick the attributes you wanna use for deep learning
     credit_cards_deep_learning = credit_cards_default_num[attributes_deep_learning]
+    
     
     if(train_dataset == True):    
         return(credit_cards_deep_learning, credit_cards_edu_numerical["credit_default"])
@@ -542,6 +607,8 @@ def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
 
     y_pred_class = keras_model.predict(X_test) #HARD
     y_pred_prob = keras_model.predict_proba(X_test) #SOFT    
+    
+    y_pred_class = convert_float_array_to_int_array(y_pred_class)
 
     # Print model performance and plot the roc curve
     print('Accuracy on test dataset is {:.3f}'.format(accuracy_score(y_test,y_pred_class)))
@@ -550,16 +617,36 @@ def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
     
     print(classification_report(y_test, y_pred_class))
     
-def convert_pred_prob_to_class(y_pred_prob):
-    y_pred_class = []
-    for class_0, class_1 in y_pred_prob:
+
+def model_compute_test_validation_accuracy_DL(keras_model, X_test, y_test):
+
+    y_pred_class = keras_model.predict(X_test) #HARD    
+    y_pred_prob = keras_model.predict_proba(X_test) #HARD    
+
+    y_pred_class = convert_float_array_to_int_array(y_pred_class)
+    y_pred_prob = convert_float_array_to_int_array(y_pred_prob)
+
+    # Print model performance and plot the roc curve
+    print('Accuracy on test dataset is {:.3f}'.format(accuracy_score(y_test,y_pred_class)))
+    
+    print('roc-auc is {:.3f}'.format(roc_auc_score(y_test,y_pred_prob)))
+
+    print(classification_report(y_test, y_pred_class))
+    
+
+    
+    
+    
+def convert_float_array_to_int_array(y_pred_class):
+    y_pred_output = []
+    for class_row in y_pred_class:
         #higher probability to be in class 0
-        if(class_0 >= class_1):
-            y_pred_class.append(0)
+        if(class_row <= 0):
+            y_pred_output.append(0)
         else:
-            y_pred_class.append(1)
+            y_pred_output.append(1)
             
-    return(y_pred_class)
+    return(y_pred_output)
     
     
     
