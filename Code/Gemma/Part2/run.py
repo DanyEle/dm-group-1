@@ -97,22 +97,10 @@ if (distance == "cosine"):
 #clusteringV1(distance, path)
 #clusteringNoAge(distance, path)
 #clusteringV2(distance, path)
-clusteringV3(distance, path)
+#clusteringV3(distance, path)
 #clusteringV4(distance, path)
 
-cPathV0 = distance + "/ClustersV0/dictionary.p"
-cPathV1 = distance + "/ClustersV1/dictionary.p"
-cPathNoAge = distance + "/ClustersNoAge/dictionary.p"
-cPathV2 = distance + "/ClustersV2/dictionary.p"
-cPathV3 = distance + "/ClustersV3/dictionary.p"
-cPathV4 = distance + "/ClustersV4/dictionary.p"
-
-#clusteringComp(distance, cPath, cPathV0)
-#clusteringComp(distance, cPath, cPathV1)
-#clusteringComp(distance, cPath, cPathNoAge)
-#clusteringComp(distance, cPath, cPathV2)
-#clusteringComp(distance, cPath, cPathV3)
-#clusteringComp(distance, cPath, cPathV4)
+#clusteringComp(distance)
 
 outputPath = "allResults.txt"
-#bestClusters(20, outputPath)
+bestClusters(20, outputPath)

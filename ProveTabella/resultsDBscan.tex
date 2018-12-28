@@ -1,0 +1,99 @@
+% chktex-file 44
+% chktex-file 17
+% chktex-file 36
+% chktex-file 13
+% chktex-file 15
+% chktex-file 29
+% chktex-file 40
+% chktex-file 1
+% chktex-file 8
+
+\documentclass[11pt,a4paper,english,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{caption}
+\usepackage{nopageno}
+\usepackage{version}
+\usepackage{babel}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage[svgnames, table]{xcolor}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{fullpage}
+\usepackage{dsfont}
+\usepackage{amssymb}
+%\usepackage{siunitx}
+\usepackage{eurosym}
+\usepackage{tikz}
+\usepackage{collcell}
+\usepackage{verbatim}
+\usepackage[T1]{fontenc}
+\usepackage{extarrows}
+\usepackage[numbers,sort]{natbib}
+\usepackage[shadow,color=green!40]{todonotes}
+\usepackage{cleveref}
+%\usepackage[euler-digits]{eulervm}
+\usepackage{palatino}
+\usepackage{pifont}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{arydshln}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{siunitx}
+\newcommand{\cmark}{\ding{51}}%
+\pgfplotsset{compat=newest}
+\newcommand{\xmark}{\ding{55}}%
+
+\begin{document}
+\begin{table}
+\pgfplotstabletypeset[
+  font={\tiny},
+  /pgf/number format/fixed,
+  /pgf/number format/precision=3,
+  color cells/.style={
+    col sep=space,
+  },
+  display columns/0/.style={
+  	column type=c,
+  	column name=\textbf{Ranking}
+  },
+  display columns/1/.style={
+  	column type=l,
+  	column name=\textbf{Distance},
+  	string type
+  },
+  display columns/2/.style={
+  	column type=c,
+  	column name=\textbf{Version}
+  },
+    display columns/3/.style={
+  	column type=c,
+  	column name=\textbf{Eps}
+  },
+    display columns/4/.style={
+  	column type=c,
+  	column name=\textbf{NumTrueClusters}
+  },
+    display columns/5/.style={
+  	column type=c,
+  	column name=\textbf{NumNoisePts}
+  },
+    display columns/6/.style={
+  	column type=c,
+  	column name=\textbf{Silhouette}
+  },
+  after row={\hline},
+  every head row/.style={before row=\toprule,after row=\midrule},
+  every last row/.style={after row=\bottomrule}
+]{results.dat}\caption{caption}\label{ba}
+\end{table}
+\end{document}
+

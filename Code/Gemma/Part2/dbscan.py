@@ -265,12 +265,33 @@ def printDictionary(d, myFile):
 """This function writes the dump of files path1 and path2 into a file results.txt in the same folder"""
 
 
-def clusteringComp(metric, path1, path2):
-    with open(path1, 'rb') as f:
+def clusteringComp(metric):
+    v0 = metric + "/ClustersV0" + "/dictionary.p"
+    v1 = metric + "/ClustersV1" + "/dictionary.p"
+    v2 = metric + "/ClustersV2" + "/dictionary.p"
+    v3 = metric + "/ClustersV3" + "/dictionary.p"
+    v4 = metric + "/ClustersV4" + "/dictionary.p"
+    if os.path.exists(metric + "/results.txt"):
+        os.remove(metric + "/results.txt")
+    else:
+        print("The file does not exist")
+    with open(v0, 'rb') as f:
         d = pickle.load(f)
         with open(metric + "/results.txt", "w+") as myFile:
             printDictionary(d, myFile)
-    with open(path2, 'rb') as f:
+    with open(v1, 'rb') as f:
+        d = pickle.load(f)
+        with open(metric + "/results.txt", "a") as myFile:
+            printDictionary(d, myFile)
+    with open(v2, 'rb') as f:
+        d = pickle.load(f)
+        with open(metric + "/results.txt", "a") as myFile:
+            printDictionary(d, myFile)
+    with open(v3, 'rb') as f:
+        d = pickle.load(f)
+        with open(metric + "/results.txt", "a") as myFile:
+            printDictionary(d, myFile)
+    with open(v4, 'rb') as f:
         d = pickle.load(f)
         with open(metric + "/results.txt", "a") as myFile:
             printDictionary(d, myFile)
@@ -290,8 +311,10 @@ def bestClusters(n, path):
                 'numClusters': values[3],
                 'numNoisePts': values[4]
             })
-        #od = collections.OrderedDict(sorted(d.items()))
-        print("The best ", n, "clusters are:")
+        #print("The best ", n, "clusters are:")
+        print(
+            "Ranking Distance Version Eps numTrueClusters numNoisePts Silhouette"
+        )
         howMany = 0
         for i, key in enumerate(sorted(d.keys(), reverse=True)):
             if howMany > n - 1: break
@@ -299,10 +322,13 @@ def bestClusters(n, path):
             #Only clusterings that make more than 1 cluster are ok
             if (int(values['numClusters']) != 1):
                 howMany = howMany + 1
-                print("~~~~~~~~~~~~~~", howMany, "~~~~~~~~~~~~~~~~~")
-                print("Distance: ", values['Distance'])
-                print("Version: ", values['Version'])
-                print("Eps: ", values['Eps'])
-                print("numTrueClusters: ", values['numClusters'])
-                print("numNoisePts: ", values['numNoisePts'])
-                print("Silhouette: ", key)
+                print(howMany, values['Distance'], values['Version'],
+                      values['Eps'], values['numClusters'],
+                      values['numNoisePts'], key)
+                #print("~~~~~~~~~~~~~~", howMany, "~~~~~~~~~~~~~~~~~")
+                #print("Distance: ", values['Distance'])
+                #print("Version: ", values['Version'])
+                #print("Eps: ", values['Eps'])
+                #print("numTrueClusters: ", values['numClusters'])
+                #print("numNoisePts: ", values['numNoisePts'])
+                #print("Silhouette: ", key)

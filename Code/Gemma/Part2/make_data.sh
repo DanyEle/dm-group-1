@@ -2,7 +2,7 @@
 i=0
 filename='allResults.txt'
 rm -r $filename
-for fldr in cityblock cosine euclidean minkowski
+for fldr in cityblock cosine euclidean
 do
   file=$fldr'/results.txt'
 
@@ -17,7 +17,7 @@ do
       fi
     else
       z=$((i / 14))
-      n=$(($z%2))
+      n=$(($z%5))
       echo $fldr $n $var &>>$filename
     fi
     ((++i))
