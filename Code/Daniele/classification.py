@@ -25,6 +25,9 @@ from sklearn.neural_network import MLPClassifier
 from keras.callbacks import Callback
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
+from sklearn.utils import resample
+
 
 from sklearn import svm
 
@@ -61,7 +64,7 @@ def run_deep_classification_algs():
 
 
     #import Gemma's function for removing outliers
-    sys.path.insert(0, './../Gemma/Part 1')
+    sys.path.insert(0, './../Gemma/Part 1/')
     from outliers import removeOutliers
     
     #import Riccardo's function for removing missing values
@@ -76,20 +79,15 @@ def run_deep_classification_algs():
     from formula_1_2_correction import correct_ps_values
     
     
-    
     #initialize data frame with the attributes we wanna consider
     attributes = ["limit", "education", "sex", "status", "age",
                                 'ps-apr', 'ps-may', 'ps-jun', 'ps-jul', 'ps-aug', 'ps-sep',
                                 "ba-apr", "ba-may", "ba-jun", "ba-jul", "ba-aug", "ba-sep", 
                                 "pa-apr", "pa-may", "pa-jun", "pa-jul", "pa-aug", "pa-sep"]
     
-  
-    
-    
     #try to create a model based on the whole dataset
     url_train = "../../Dataset/credit_default_train.csv"
     #url_train = "../../Dataset/UCI_Credit_Card.csv"
-    
     
     #training data frame
     credit_cards_deep_learning_train, labels_train = load_pre_process_dataset(url_train, True, attributes)
@@ -163,7 +161,6 @@ def run_deep_classification_algs():
 
 
     """DECISION TREES - SDT"""
-    
     dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
                              min_samples_split=2, min_samples_leaf=1)
     
@@ -187,10 +184,9 @@ def run_deep_classification_algs():
     Image(graph.create_png())
         
       #Stratifled shuffle split with decision trees
-    """ SDT WITH STRATIFIED SHUFFLE SPLIT"""
+    """ SDT with 10-fold cross-validation"""
     sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
-    sss.get_n_splits(X, y)    
-    
+        
     i = 1
     for train_index, test_index in sss.split(X, y):
         X_train, X_test = X[train_index], X[test_index]
@@ -205,10 +201,58 @@ def run_deep_classification_algs():
         model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
         model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
 
+        dec_tree.classes_ = ["no", "yes"]
+
         i = i + 1
         
-    """ SDT with oversampling"""
-        
+    
+    #plot the fourth element, starting from 0
+    generator = sss.split(X, y)
+    
+    train_index, test_index = list(generator)[3]
+    
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+
+    dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
+                         min_samples_split=2, min_samples_leaf=1)
+    
+    dec_tree.fit(X_train, y_train) 
+    
+    model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
+    model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
+
+    dec_tree.classes_ = ["no", "yes"]
+    
+    dot_data = tree.export_graphviz(dec_tree, out_file=None,  
+                                feature_names=attributes, 
+                                class_names=dec_tree.classes_,  
+                                filled=True, rounded=True,  
+                                special_characters=True)  
+    graph = pydotplus.graph_from_dot_data(dot_data)  
+    Image(graph.create_png())
+    
+    for col, imp in zip(attributes, dec_tree.feature_importances_):
+        print(col, imp)   
+    
+    
+    """ SDT with downsampling """
+    rus = RandomUnderSampler(random_state=42)
+    X_res, y_res = rus.fit_resample(X, y)
+    
+    
+    X_train_res, X_test_res, y_train_res, y_test_res = train_test_split(X_res, y_res, test_size=0.2, random_state=11111)
+
+
+    dec_tree = DecisionTreeClassifier(criterion='gini', max_depth=2, 
+                             min_samples_split=2, min_samples_leaf=1)
+    
+    dec_tree.fit(X_train_res, y_train_res)
+    
+    model_compute_test_validation_accuracy(dec_tree, X_test_res, y_test_res)
+    model_compute_test_validation_accuracy(dec_tree, X_train_res, y_train_res)
+    
+    """SDT with oversampling"""
     ros = RandomOverSampler(random_state=42)
     X_res, y_res = ros.fit_resample(X, y)
     
@@ -218,57 +262,205 @@ def run_deep_classification_algs():
     dec_tree.fit(X_res, y_res)
     
     model_compute_test_validation_accuracy(dec_tree, X_test, y_test)
-    model_compute_test_validation_accuracy(dec_tree, X_train, y_train)
+    model_compute_test_validation_accuracy(dec_tree, X_train, y_train)   
     
     
+    """OPTIMIZED DECISION TREE with the whole dataset """
     
-    ##OPTIMIZE BY GRID SEARCH
-
-    #let's try tuning the hyperparameters by grid search
+    ##Grid Search
     param_list_grid = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
-                  'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
-                  'max_depth': [None] + list(np.arange(2, 5)), #previously, not considered this. 
-                 }
-
-    dec_tree_optimized_grid = optimize_model(dec_tree, 1, param_list_grid, X, y)
-    model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
-    
-    ##OPTIMIZE BY RANDOMIZED SEARCH
+                      'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
+                      'max_depth': [None] + list(np.arange(2, 5)), #previously, not considered this. 
+                     }
+    for i in range(1, 6):
+        print("i = " + str(i))
+        dec_tree_optimized_grid = optimize_model(dec_tree, 1, param_list_grid, X_train, y_train)
+        model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
+        model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_train, y_train)
+        
+    ##Randomized Search
     param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 100)),
               'min_samples_split': [2, 5, 10, 20, 30, 50, 100, 150, 200],
               'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100, 150, 200],
              }
     
-    dec_tree_rand_search = optimize_model(dec_tree, 2, param_list_rand_search, X, y)   
-    model_compute_test_validation_accuracy(dec_tree_rand_search, X_test, y_test)
+    for i in range(1, 6):
+        print("i = " + str(i))
+        dec_tree_optimized_grid = optimize_model(dec_tree, 2, param_list_grid, X_train, y_train)
+        model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
+        model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_train, y_train)
+        
     
+    """OPTIMIZED DECISION TREE with 10-fold cross-validation and grid search"""    
     
-    dec_tree_rand_search.classes_ = ["no", "yes"]
+    #Grid Search
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
     
-     #actually apply the model   . F-Score of 0.81716
-    output_model_results_to_file(dec_tree_rand_search, "group_1_submission_15_dec_rand_search.txt", credit_cards_deep_learning_test, None)
+    param_list_grid = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
+                      'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
+                      'max_depth': [None] + list(np.arange(2, 5)), #previously, not considered this. 
+                     }
+        
+    i = 0
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
     
-    ##let's visualize the tree
-    dot_data = tree.export_graphviz(dec_tree_rand_search, out_file=None,  
+      
+    
+        print("i = " + str(i))
+        dec_tree_optimized_grid = optimize_model(dec_tree, 1, param_list_grid, X_train, y_train)
+        model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
+        model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_train, y_train)
+        
+        i = i + 1
+        
+    """OPTIMIZED DECISION TREE with 10-fold cross-validation and randomized search"""    
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 100)),
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100, 150, 200],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100, 150, 200],
+             }
+        
+    i = 1
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        print("i = " + str(i))
+        dec_tree_optimized_rand_search = optimize_model(dec_tree, 2, param_list_rand_search, X_train, y_train)
+        model_compute_test_validation_accuracy(dec_tree_optimized_rand_search, X_test, y_test)
+        model_compute_test_validation_accuracy(dec_tree_optimized_rand_search, X_train, y_train)
+        
+        i = i + 1
+        
+    """ Output best ODT with grid /randomized search"""
+        
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+    param_list_rand_search = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
+                      'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
+                      'max_depth': [None] + list(np.arange(2, 100)), #previously, not considered this. 
+                     }
+    generator = sss.split(X, y)
+    train_index, test_index = list(generator)[8]
+    
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+
+    dec_tree_optimized_rand_search = optimize_model(dec_tree, 2, param_list_rand_search, X_train, y_train)
+    model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_test, y_test)
+    model_compute_test_validation_accuracy(dec_tree_optimized_grid, X_train, y_train)
+    
+    output_model_results_to_file(dec_tree_optimized_rand_search, "group_1_submission_29_dec_rand_search_59_levels.txt", credit_cards_deep_learning_test, None)
+
+    
+    #plot the best decision tree
+    dec_tree_optimized_rand_search.classes_ = ["no", "yes"]
+    dot_data = tree.export_graphviz(dec_tree_optimized_rand_search, out_file=None,  
                                 feature_names=attributes, 
-                                class_names=dec_tree_rand_search.classes_,  
+                                class_names=dec_tree.classes_,  
                                 filled=True, rounded=True,  
                                 special_characters=True)  
     graph = pydotplus.graph_from_dot_data(dot_data)  
     Image(graph.create_png())
-        
-    for col, imp in zip(attributes, dec_tree_rand_search.feature_importances_):
-        print(col, imp)
+    
+    for col, imp in zip(attributes, dec_tree.feature_importances_):
+        print(col, imp)   
         
         
 
+            
+    """SIMPLE RANDOM FOREST by 10-fold cross-validation"""
+    
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+        
+    i = 1
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        
+        print("i = " + str(i))
+        rf_model = RandomForestClassifier(n_estimators=200, 
+                                 criterion='gini', 
+                                 max_depth=None, 
+                                 min_samples_split=2, 
+                                 min_samples_leaf=1, 
+                                 class_weight=None)
+    
+        rf_model.fit(X_train, y_train)
+        
+        model_compute_test_validation_accuracy(rf_model, X_test, y_test)
+        model_compute_test_validation_accuracy(rf_model, X_train, y_train)
+        i = i + 1
         
     
-    #output_model_results_to_file(clf, "group_1_submission_9_DL_Dec_Tree.txt", credit_cards_deep_learning_test, None)
     
-    """RANDOM FOREST"""
+    """OPTIMIZED RANDOM FOREST by 10-fold cross-validation with grid search"""
+    rf_model = RandomForestClassifier(n_estimators=200, 
+                                 criterion='gini', 
+                                 max_depth=None, 
+                                 min_samples_split=2, 
+                                 min_samples_leaf=1, 
+                                 class_weight=None)
     
-    #let's try taking a balanced sample
+    rf_model.fit(X_train, y_train)
+        
+    
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+        
+    i = 1
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        
+        print("i = " + str(i))
+    
+        #let's try tuning the hyperparameters by grid search
+        param_list_grid = {
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100, 150, 200],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100, 150, 200],
+              'max_depth': [None] + list(np.arange(2, 5)),
+                 }
+        rf_model_optimized_grid = optimize_model(rf_model, 1, param_list_grid, X_train, y_train)
+    
+        model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
+        model_compute_test_validation_accuracy(rf_model_optimized_grid, X_train, y_train)
+        
+        i = i + 1
+
+    
+    #output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_18_RF_grid.txt", credit_cards_deep_learning_test, None)
+        
+    
+    """OPTIMIZED RANDOM FOREST by 10-fold cross-validation with randomized search"""
+    
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+        
+    i = 1
+    for train_index, test_index in sss.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        
+        print("i = " + str(i))
+  
+        param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 100)),
+              'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
+              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
+             }
+
+        #F1-score= 0.91; accuracy = 0.917; roc-auc = 0.982
+        clf_optimized_rand_search = optimize_model(rf_model, 2, param_list_rand_search, X_train, y_train)
+            
+        model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
+        model_compute_test_validation_accuracy(clf_optimized_rand_search, X_train, y_train)
+
+        i = i + 1
+        
+        
+    """Optimized random forest with downsampling """
+    
+    rus = RandomUnderSampler(random_state=42)
+    X_res, y_res = rus.fit_resample(X, y)
+    
     
     rf_model = RandomForestClassifier(n_estimators=200, 
                                  criterion='gini', 
@@ -278,51 +470,50 @@ def run_deep_classification_algs():
                                  class_weight=None)
     
     rf_model.fit(X_train, y_train)
-    
-    model_compute_test_validation_accuracy(rf_model, X_test, y_test)
-    
-    #let's try finding best parameters for random forest
-    
-      #let's try tuning the hyperparameters by grid search
-    param_list_grid = {
-              'min_samples_split': [2, 5, 10, 20, 30, 50, 100, 150, 200],
-              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100, 150, 200],
-              'max_depth': [None] + list(np.arange(2, 50)),
-                 }
-    
-    #F1-score = 0.86; accuracy; 0.873; roc-auc: 0.953;
-    
-    #FULL DATASET, no status and sex - F1 score= 0.81, accuracy = 0.0828, roc-auc = 0.888
-    #FULL DATASET, status and sex - F1 score = 0.86. accuracy = 0.876. roc-auc = 0.970
-    rf_model_optimized_grid = optimize_model(rf_model, 1, param_list_grid, X, y)
-    model_compute_test_validation_accuracy(rf_model_optimized_grid, X_test, y_test)
-    
-    
-    output_model_results_to_file(rf_model_optimized_grid, "group_1_submission_18_RF_grid.txt", credit_cards_deep_learning_test, None)
         
-  
-    param_list_rand_search = {'max_depth': [None] + list(np.arange(2, 100)),
-              'min_samples_split': [2, 5, 10, 20, 30, 50, 100],
-              'min_samples_leaf': [1, 5, 10, 20, 30, 50, 100],
-             }
+    """Get the the Optimized Random Forest Model with best performance for grid search"""
+    
+    
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+    param_list_rand_search = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
+                      'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
+                      'max_depth': [None] + list(np.arange(2, 5)), #previously, not considered this. 
+                     }
+    generator = sss.split(X, y)
+    train_index, test_index = list(generator)[3]
+    
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
 
-    #F1-score= 0.91; accuracy = 0.917; roc-auc = 0.982
-    clf_optimized_rand_search = optimize_model(rf_model, 2, param_list_rand_search, X, y)
-        
-    #
-    model_compute_test_validation_accuracy(clf_optimized_rand_search, X_test, y_test)
+    rf_optimized_rand_search = optimize_model(rf_model, 1, param_list_rand_search, X_train, y_train)
+    model_compute_test_validation_accuracy(rf_optimized_rand_search, X_test, y_test)
+    model_compute_test_validation_accuracy(rf_optimized_rand_search, X_train, y_train)
     
-    output_model_results_to_file(clf_optimized_rand_search, "group_1_submission_19_rand_search.txt", credit_cards_deep_learning_test, None)
-        
     
-    scores = cross_val_score(rf_model, X, y, cv=50)
+    output_model_results_to_file(rf_optimized_rand_search, "group_1_submission_30_optimized_rand_forest_grid.txt", credit_cards_deep_learning_test, None)
     
-    print('RF Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
     
-    scores = cross_val_score(rf_model, X, y, cv=50, scoring='f1_macro')
-    print('RF Accuracy .F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))   
     
+    """Get the the Optimized Random Forest Model with best performance for rand search """
 
+    sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=1111)
+    param_list_rand_search = {'min_samples_split': [2, 5, 10, 20, 30, 40, 50, 100],
+                      'min_samples_leaf': [1, 5, 10, 20, 30, 40, 50, 100],
+                      'max_depth': [None] + list(np.arange(2, 100)), #previously, not considered this. 
+                     }
+    generator = sss.split(X, y)
+    train_index, test_index = list(generator)[3]
+    
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+
+    rf_optimized_rand_search = optimize_model(rf_model, 2, param_list_rand_search, X_train, y_train)
+    model_compute_test_validation_accuracy(rf_optimized_rand_search, X_test, y_test)
+    model_compute_test_validation_accuracy(rf_optimized_rand_search, X_train, y_train)
+    
+    output_model_results_to_file(rf_optimized_rand_search, "group_1_submission_31_optimized_rand_forest_rand_search.txt", credit_cards_deep_learning_test, None)
+
+            
     
     """ K - NEAREST NEIGHBORS """
     """ KNN by Cross-validaiton """ #pretty poor performance
@@ -370,8 +561,6 @@ def inspect_training_set_for_na_infinite_values(X_train_sss):
             
                 
     
-        
-
 def load_all_labels():
     #some random experiments
     
@@ -581,8 +770,7 @@ def model_compute_test_validation_accuracy(keras_model, X_test, y_test):
     y_pred_class = convert_float_array_to_int_array(y_pred_class)
 
     # Print model performance and plot the roc curve
-    print('Accuracy is {:.3f}'.format(accuracy_score(y_test,y_pred_class)))
-    print('roc-auc is {:.3f}'.format(roc_auc_score(y_test,y_pred_prob[:,1])))
+    print('Accuracy: ' + str(round(accuracy_score(y_test,y_pred_class), 2)) + " Roc-auc " + str(round(roc_auc_score(y_test,y_pred_prob[:,1]), 2)))
     #plot_roc(y_test, y_pred_prob, 'NN')
     print(classification_report(y_test, y_pred_class))
     
