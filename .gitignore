@@ -4,6 +4,8 @@ include/
 lib/
 lib64/
 site-packages/
+share/
+etc/
 pyvenv.cfg
 lib64
 pip-selfcheck.json
