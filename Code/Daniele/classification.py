@@ -516,33 +516,34 @@ def run_deep_classification_algs():
             
     
     """ K - NEAREST NEIGHBORS """
-    """ KNN by Cross-validaiton """ #pretty poor performance
-
-    indexes_vector = []
-    accuracy_vector = []
-    f1_vector = []
     
     for i in range(1, 100):
-        clf = KNeighborsClassifier(n_neighbors=i)
-        indexes_vector.append(i)
-        scores = cross_val_score(clf, X, y, cv=10)
-        print('KNN k = ' + str(i) + 'Accuracy: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
-        accuracy_vector.append(scores.mean())
-    
-        scores = cross_val_score(clf, X, y, cv=10, scoring='f1_macro')
-        print('KNN k = ' + str(i) + 'F1-score: %0.4f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
-        f1_vector.append(scores.mean())
+        print("i = " + str(i))
+        knn = KNeighborsClassifier(n_neighbors=i)
+        knn.fit(X_train, y_train) 
+        model_compute_test_validation_accuracy(knn, X_test, y_test)
+        model_compute_test_validation_accuracy(knn, X_train, y_train)
 
     
     """Naive Bayes"""
-    
     model = GaussianNB()
 
     # Train the model using the training sets 
-    model.fit(X_test, y_test)
+    model.fit(X_train, y_train)
     
     model_compute_test_validation_accuracy(model, X_test, y_test)
+    model_compute_test_validation_accuracy(model, X_train, y_train)
 
+    
+    """ SVM """
+    
+    svm_model = svm.SVC(gamma='scale')
+    svm_model.fit(X_train, y_train)      
+    
+    model_compute_test_validation_accuracy(svm_model, X_test, y_test)
+    model_compute_test_validation_accuracy(svm_model, X_train, y_train)
+
+    
     
     
 def inspect_training_set_for_na_infinite_values(X_train_sss):
