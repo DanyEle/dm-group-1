@@ -1,0 +1,17 @@
+digraph Tree {
+node [shape=box, style="filled, rounded", color="black", fontname=helvetica] ;
+edge [fontname=helvetica] ;
+0 [label=<ps-sep &le; 1.5<br/>gini = 0.345<br/>samples = 7976<br/>value = [6210, 1766]<br/>class = no>, fillcolor="#e58139b6"] ;
+1 [label=<ps-aug &le; 1.5<br/>gini = 0.274<br/>samples = 7115<br/>value = [5947, 1168]<br/>class = no>, fillcolor="#e58139cd"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label=<gini = 0.24<br/>samples = 6521<br/>value = [5612, 909]<br/>class = no>, fillcolor="#e58139d6"] ;
+1 -> 2 ;
+3 [label=<gini = 0.492<br/>samples = 594<br/>value = [335, 259]<br/>class = no>, fillcolor="#e581393a"] ;
+1 -> 3 ;
+4 [label=<ps-jul &le; -0.5<br/>gini = 0.424<br/>samples = 861<br/>value = [263, 598]<br/>class = yes>, fillcolor="#399de58f"] ;
+0 -> 4 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+5 [label=<gini = 0.482<br/>samples = 52<br/>value = [31, 21]<br/>class = no>, fillcolor="#e5813952"] ;
+4 -> 5 ;
+6 [label=<gini = 0.409<br/>samples = 809<br/>value = [232, 577]<br/>class = yes>, fillcolor="#399de598"] ;
+4 -> 6 ;
+}

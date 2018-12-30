@@ -4,21 +4,6 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-#os.chdir('/home/daniele/dm-group-1/Code/Daniele')
-#os.chdir('/home/gemma/Documents/Data Mining/dm-group-1/Code/Daniele')
-
-#dependencies on Riccardo's remove missing values function
-sys.path.insert(0, '../../Riccardo')
-from MissingValues_3 import remove_missing_values
-
-#dependencies on Gemma's remove outliers function
-sys.path.insert(0, '../../Gemma/Part1')
-from outliers import removeOutliers
-
-#dependencies on Maddalena's formula to correct ps values
-sys.path.insert(0, '../../Maddalena')
-from formula_1_2_correction import correct_ps_values
-
 
 
 
@@ -26,7 +11,19 @@ from formula_1_2_correction import correct_ps_values
 
 
 def main():
-    #load dataset into a dataframe
+	#os.chdir('/home/daniele/dm-group-1/Code/Daniele')
+	#os.chdir('/home/gemma/Documents/Data Mining/dm-group-1/Code/Daniele')
+    # dependencies on Riccardo's remove missing values function
+    sys.path.insert(0, '../../Riccardo')
+    from MissingValues_3 import remove_missing_values
+    # dependencies on Gemma's remove outliers function
+    sys.path.insert(0, '../../Gemma/Part1')
+    from outliers import removeOutliers
+
+    # dependencies on Maddalena's formula to correct ps values
+    sys.path.insert(0, '../../Maddalena')
+    from formula_1_2_correction import correct_ps_values
+    # load dataset into a dataframe
 
     credit_cards = pd.read_csv("/home/daniele/dm-group-1/Dataset/credit_default_train.csv")
     #remember: load the corresponding function from Riccardo's scripts
