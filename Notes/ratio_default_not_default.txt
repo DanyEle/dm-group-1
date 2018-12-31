@@ -1,0 +1,9 @@
+Amount of 1s in my small dataset [9970 records]: 2208
+Amount of 0s in my small dataset [9970 records]: 7762
+
+Ratio: 0.7785356068204614
+
+Amount of 1s in the whole dataset[30000 records]: 6636
+Amount of 0s in my small dataset[30000 records]: 23364
+
+Ratio: 0.7788
