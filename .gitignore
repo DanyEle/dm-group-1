@@ -1,5 +1,16 @@
+#virtualenv files and folders
+bin/
+include/
+lib/
+lib64/
+site-packages/
+share/
+etc/
+pyvenv.cfg
+lib64
+pip-selfcheck.json
+
 #useless plots
 Code/Gemma/Part2/cityblock/
 Code/Gemma/Part2/cosine/
 Code/Gemma/Part2/euclidean/
-Code/Gemma/Part2/minkowski/
