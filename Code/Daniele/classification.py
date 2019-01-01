@@ -61,10 +61,11 @@ def run_deep_classification_algs():
     """INITIALIZE INPUT DATA"""
     
     os.chdir('/home/daniele/dm-group-1/Code/Daniele')
-
+    
+    from dependencies import create_data_frame_avg
 
     #import Gemma's function for removing outliers
-    sys.path.insert(0, './../Gemma/Part 1/')
+    sys.path.insert(0, './../Gemma/Part1')
     from outliers import removeOutliers
     
     #import Riccardo's function for removing missing values
@@ -73,7 +74,6 @@ def run_deep_classification_algs():
     
     #import Daniele's function for converting education into a numerical attribute
     #import also Daniele's function for adding mean columns' value to the data frame
-    from dependencies import create_data_frame_avg
     
     sys.path.insert(0, './../Maddalena')
     from formula_1_2_correction import correct_ps_values
