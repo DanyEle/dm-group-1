@@ -1,30 +1,6 @@
 
 # coding: utf-8
 
-# ## Using Keras to Build and Train Neural Networks
-
-# In this exercise we will use a neural network to predict diabetes using the Pima Diabetes Dataset.  We will start by training a Random Forest to get a performance baseline.  Then we will use the Keras package to quickly build and train a neural network and compare the performance.  We will see how different network structures affect the performance, training time, and level of overfitting (or underfitting).
-# 
-# ## UCI Pima Diabetes Dataset
-# 
-# * UCI ML Repositiory (http://archive.ics.uci.edu/ml/datasets/Pima+Indians+Diabetes)
-# 
-# 
-# ### Attributes: (all numeric-valued)
-#    1. Number of times pregnant
-#    2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test
-#    3. Diastolic blood pressure (mm Hg)
-#    4. Triceps skin fold thickness (mm)
-#    5. 2-Hour serum insulin (mu U/ml)
-#    6. Body mass index (weight in kg/(height in m)^2)
-#    7. Diabetes pedigree function
-#    8. Age (years)
-#    9. Class variable (0 or 1)
-
-# The UCI Pima Diabetes Dataset which has 8 numerical predictors and a binary outcome.
-
-# In[1]:
-
 
 #Preliminaries
 
@@ -42,18 +18,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_auc_score, roc_curve, accuracy_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.utils import resample
+
 
 import seaborn as sns
-
-get_ipython().run_line_magic('matplotlib', 'inline')
-
 
 # In[2]:
 
 
 ## Import Keras objects for Deep Learning
 
-from keras.models  import Sequential, K
+from keras.models  import Sequential
 from keras.layers import Input, Dense, Flatten, Dropout, BatchNormalization
 from keras.optimizers import Adam, SGD, RMSprop
 
@@ -62,17 +37,60 @@ from keras.optimizers import Adam, SGD, RMSprop
 
 
 #import Gemma's function for removing outliers
-sys.path.insert(0, './../Gemma/Part 1')
-from outliers import removeOutliers
+"""Questa funzione elimina gli outlier individuati tramite una visual analysis in place nel data frame dataFrame"""
+
+
+def removeOutliers(dataFrame):
+    print("Initial size of data frame: ", dataFrame.shape)
+    baMay = getattr(dataFrame, "ba-may")
+    baApr = getattr(dataFrame, "ba-apr")
+    paAug = getattr(dataFrame, "pa-aug")
+    paApr = getattr(dataFrame, "pa-apr")
+    paMay = getattr(dataFrame, "pa-may")
+    rows = []
+    for i in range(0, len(baMay)):
+        if ((int(baMay[i]) < -5000) | (int(baApr[i]) < -5000) |
+            (int(paAug[i]) > 500000) | (int(paApr[i]) > 500000) |
+            (int(paMay[i]) > 400000)):
+            rows.append(i)
+    print("Visual analysis, number of rows to be dropped: ", len(rows))
+    dataFrame.drop(dataFrame.index[rows], inplace=True)
+    print("Final size of data frame: ", dataFrame.shape)
+    return
 
 #import Riccardo's function for removing missing values
-sys.path.insert(0, './../Riccardo')
-from MissingValues_3 import remove_missing_values
+def remove_missing_values(df_in):
+    df_out = df_in
+    #SEX
+    #fill missing values with the mode of sex (female)
+    df_out['sex'] = df_out['sex'].fillna(df_out['sex'].mode()[0])
+    
+    #EDUCATION
+    df_out['education'] = df_out['education'].fillna('others')
+    
+    #STATUS
+    df_out['status'] = df_out['status'].groupby([df_out['sex'], df_out['education']]).apply( 
+      lambda x: x.fillna(x.mode()[0]))
+    
+    #AGE
+    #dataframe without rows where age is -1
+    df_out['age'] = df_out['age'].groupby([df_out['sex'], df_out['education'],
+      df_out['status']]).apply(lambda x: x.replace(-1, x.median()))
+    
+    return df_out
 
 #import Daniele's function for converting education into a numerical attribute
 #import also Daniele's function for adding mean columns' value to the data frame
-from dependencies import create_data_frame_avg
-
+def create_data_frame_avg(credit_cards, columns_balance, columns_pa, columns_ps):
+    mean_ba_column = credit_cards[columns_balance].mean(axis=1)
+    mean_pa_column = credit_cards[columns_pa].mean(axis=1)
+    mean_ps_column =  credit_cards[columns_ps].mean(axis=1)
+    
+    credit_cards["ps"] = mean_ps_column
+    credit_cards["pa"] = mean_pa_column
+    credit_cards["ba"] = mean_ba_column
+    
+    return(credit_cards)
 
 # In[164]:
 
@@ -155,6 +173,35 @@ url_train = "../../Dataset/credit_default_train.csv"
 
 credit_cards_deep_learning_train, labels_train = load_pre_process_dataset(url_train, True, attributes_deep_learning)
 
+df = credit_cards_deep_learning_train
+
+df["label"] = labels_train
+
+#let's notice that the dataset is actually strongly imbalanced
+df["label"].value_counts()
+
+#let's downsample the majority class
+# Separate majority and minority classes
+df_majority = df[df["label"]==0]
+df_minority = df[df["label"]==1]
+ 
+# Downsample majority class
+df_majority_downsampled = resample(df_majority, 
+                                 replace=False,    # sample without replacement
+                                 n_samples=2208,     # to match minority class
+                                 random_state=123) # reproducible results
+ 
+# Combine minority class with downsampled majority class
+df_downsampled = pd.concat([df_majority_downsampled, df_minority])
+
+df_downsampled["label"].value_counts()
+
+
+credit_cards_deep_learning_train = df_downsampled
+
+
+
+
 # Take a peek at the data 
 print(credit_cards_deep_learning_train.shape)
 credit_cards_deep_learning_train.sample(5)
@@ -175,9 +222,15 @@ credit_cards_deep_learning_test.sample(5)
 
 #Input: X is the dataframe without the credit_default label
 
+
+y = credit_cards_deep_learning_train["label"]
+
+credit_cards_deep_learning_train.drop(columns=["label"], inplace=True)
+
+
+
 X = credit_cards_deep_learning_train.values
 #the output consists of the state with diabetes
-y = labels_train
 
 
 # In[188]:
@@ -307,30 +360,27 @@ model_1 = Sequential([
 
 #  This is a nice tool to view the model you have created and count the parameters
 
-model_1.summary()
+ #probably overfitting
+model_2 = Sequential([
+    #3 hidden layers with 14 neurons in each one
+    Dense(20, input_shape=(27,), activation="relu"),
+    Dense(10, activation="relu"),
+    #final layer
+    Dense(1, activation="sigmoid"),
+])  
 
-
-# In[199]:
-
-
-# Fit(Train) the Model
-
-# Compile the model with Optimizer, Loss Function and Metrics
-# Roc-Auc is not available in Keras as an off the shelf metric yet, so we will skip it here.
-
-model_1.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
-run_hist_1 = model_1.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=200)
-# the fit function returns the run history. 
-# It is very convenient, as it contains information about the model fit, iterations etc.
-
-
+#0.723 on the test dataset :(
+model_2.compile(SGD(lr = .003), "binary_crossentropy", metrics=["accuracy"])
+    
+run_hist_2 = model_2.fit(X_train_norm, y_train, validation_data=(X_test_norm, y_test), epochs=200)
+plot_model_train_validation_loss(run_hist_2)
 # In[203]:
 
 
 ## Like we did for the Random Forest, we generate two kinds of predictions
 #  One is a hard decision, the other is a probabilitistic score.
 
-plot_model_train_validation_loss(run_hist_1)
+plot_model_train_validation_loss(run_hist_2)
 
 plot_roc(y_test, y_pred_prob_nn_1, 'NN')
 
@@ -425,8 +475,7 @@ output_results_to_file("group_1_submission_3rd_try.txt", y_labels)
 
 # In[258]:
 
-
-1.# Define the Model 
+# Define the Model 
 # Input size is 8-dimensional
 # 1 hidden layer, 6 hidden nodes, relu activation
 # 1 hidden layer, 6 hidden nodes, relu activation
